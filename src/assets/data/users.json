@@ -1,0 +1,211 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "position": "Software Engineer",
+      "address": "123 Main St, New York",
+      "salary": 85000,
+      "phone": "+1 234 567 8901"
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "position": "Product Manager",
+      "address": "456 Elm St, San Francisco",
+      "salary": 95000,
+      "phone": "+1 345 678 9012"
+    },
+    {
+      "id": 3,
+      "name": "Michael Johnson",
+      "position": "QA Engineer",
+      "address": "789 Oak St, Chicago",
+      "salary": 75000,
+      "phone": "+1 456 789 0123"
+    },
+    {
+      "id": 4,
+      "name": "Emily Davis",
+      "position": "Data Scientist",
+      "address": "321 Pine St, Seattle",
+      "salary": 105000,
+      "phone": "+1 567 890 1234"
+    },
+    {
+      "id": 5,
+      "name": "David Wilson",
+      "position": "UX Designer",
+      "address": "654 Maple St, Austin",
+      "salary": 80000,
+      "phone": "+1 678 901 2345"
+    },
+    {
+      "id": 6,
+      "name": "Sarah Brown",
+      "position": "DevOps Engineer",
+      "address": "987 Cedar St, Boston",
+      "salary": 90000,
+      "phone": "+1 789 012 3456"
+    },
+    {
+      "id": 7,
+      "name": "James Miller",
+      "position": "Systems Analyst",
+      "address": "135 Birch St, Denver",
+      "salary": 78000,
+      "phone": "+1 890 123 4567"
+    },
+    {
+      "id": 8,
+      "name": "Linda Garcia",
+      "position": "Marketing Specialist",
+      "address": "246 Spruce St, Miami",
+      "salary": 72000,
+      "phone": "+1 901 234 5678"
+    },
+    {
+      "id": 9,
+      "name": "Robert Martinez",
+      "position": "Network Administrator",
+      "address": "369 Fir St, Atlanta",
+      "salary": 85000,
+      "phone": "+1 012 345 6789"
+    },
+    {
+      "id": 10,
+      "name": "Jessica Rodriguez",
+      "position": "Content Writer",
+      "address": "159 Willow St, Portland",
+      "salary": 65000,
+      "phone": "+1 123 456 7890"
+    },
+    {
+      "id": 11,
+      "name": "Daniel Hernandez",
+      "position": "Web Developer",
+      "address": "753 Chestnut St, Philadelphia",
+      "salary": 88000,
+      "phone": "+1 234 567 8902"
+    },
+    {
+      "id": 12,
+      "name": "Laura Lee",
+      "position": "Business Analyst",
+      "address": "852 Ash St, Dallas",
+      "salary": 77000,
+      "phone": "+1 345 678 9013"
+    },
+    {
+      "id": 13,
+      "name": "Kevin Clark",
+      "position": "IT Support Specialist",
+      "address": "951 Walnut St, San Diego",
+      "salary": 60000,
+      "phone": "+1 456 789 0124"
+    },
+    {
+      "id": 14,
+      "name": "Megan Lewis",
+      "position": "Sales Executive",
+      "address": "159 Oak St, Orlando",
+      "salary": 92000,
+      "phone": "+1 567 890 1235"
+    },
+    {
+      "id": 15,
+      "name": "Brian Walker",
+      "position": "Graphic Designer",
+      "address": "753 Maple St, Phoenix",
+      "salary": 70000,
+      "phone": "+1 678 901 2346"
+    },
+    {
+      "id": 16,
+      "name": "Angela Hall",
+      "position": "SEO Specialist",
+      "address": "852 Pine St, Las Vegas",
+      "salary": 75000,
+      "phone": "+1 789 012 3457"
+    },   {
+      "id": 7,
+      "name": "James Miller",
+      "position": "Systems Analyst",
+      "address": "135 Birch St, Denver",
+      "salary": 78000,
+      "phone": "+1 890 123 4567"
+    },
+    {
+      "id": 8,
+      "name": "Linda Garcia",
+      "position": "Marketing Specialist",
+      "address": "246 Spruce St, Miami",
+      "salary": 72000,
+      "phone": "+1 901 234 5678"
+    },
+    {
+      "id": 9,
+      "name": "Robert Martinez",
+      "position": "Network Administrator",
+      "address": "369 Fir St, Atlanta",
+      "salary": 85000,
+      "phone": "+1 012 345 6789"
+    },
+    {
+      "id": 10,
+      "name": "Jessica Rodriguez",
+      "position": "Content Writer",
+      "address": "159 Willow St, Portland",
+      "salary": 65000,
+      "phone": "+1 123 456 7890"
+    },
+    {
+      "id": 11,
+      "name": "Daniel Hernandez",
+      "position": "Web Developer",
+      "address": "753 Chestnut St, Philadelphia",
+      "salary": 88000,
+      "phone": "+1 234 567 8902"
+    },
+    {
+      "id": 12,
+      "name": "Laura Lee",
+      "position": "Business Analyst",
+      "address": "852 Ash St, Dallas",
+      "salary": 77000,
+      "phone": "+1 345 678 9013"
+    },
+    {
+      "id": 13,
+      "name": "Kevin Clark",
+      "position": "IT Support Specialist",
+      "address": "951 Walnut St, San Diego",
+      "salary": 60000,
+      "phone": "+1 456 789 0124"
+    },
+    {
+      "id": 14,
+      "name": "Megan Lewis",
+      "position": "Sales Executive",
+      "address": "159 Oak St, Orlando",
+      "salary": 92000,
+      "phone": "+1 567 890 1235"
+    },
+    {
+      "id": 15,
+      "name": "Brian Walker",
+      "position": "Graphic Designer",
+      "address": "753 Maple St, Phoenix",
+      "salary": 70000,
+      "phone": "+1 678 901 2346"
+    },
+    {
+      "id": 16,
+      "name": "Angela Hall",
+      "position": "SEO Specialist",
+      "address": "852 Pine St, Las Vegas",
+      "salary": 75000,
+      "phone": "+1 789 012 3457"
+    }
+  ]
+}
