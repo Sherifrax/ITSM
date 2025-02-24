@@ -134,7 +134,7 @@ export default function BasicTableOne({
         </div>
       </div>
 
-      <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)}>
+      <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)} className="max-w-sm">
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-4 dark:text-gray-400">Confirm Deletion</h2>
           <p className="mb-6 dark:text-red-400">Are you sure you want to delete this user?</p>

@@ -206,8 +206,8 @@ export default function UserManagement() {
       </div>
 
       {/* Add/Edit User Modal */}
-      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
-        <form onSubmit={handleSubmit} className="p-6">
+      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} className="max-w-md">
+        <form onSubmit={handleSubmit} className="p-6 ">
           <h2 className="text-xl font-semibold mb-6 dark:text-white/90">
             {formData.id === 0 ? "Add New User" : "Edit User"}
           </h2>
