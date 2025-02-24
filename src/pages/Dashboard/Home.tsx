@@ -21,9 +21,9 @@ import EcommerceMetrics from "../../components/dashboard/EcommerceMetrics";
 import MonthlySalesChart from "../../components/dashboard/MonthlySalesChart";
 import StatisticsChart from "../../components/dashboard/StatisticsChart";
 import MonthlyTarget from "../../components/dashboard/MonthlyTarget";
-import RecentOrders from "../../components/dashboard/RecentOrders";
 import DemographicCard from "../../components/dashboard/DemographicCard";
 import PageMeta from "../../components/common/PageMeta";
+import RecentProjects from "../../components/dashboard/RecentProjects";
 
 export default function Home() {
   return (
@@ -52,7 +52,7 @@ export default function Home() {
         </div>
 
         <div className="col-span-12 xl:col-span-7">
-          <RecentOrders />
+          <RecentProjects />
         </div>
       </div>
     </>

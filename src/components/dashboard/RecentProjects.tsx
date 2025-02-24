@@ -8,73 +8,72 @@ import {
 import Badge from "../ui/badge/Badge";
 
 // Define the TypeScript interface for the table rows
-interface Product {
-  id: number; // Unique identifier for each product
-  name: string; // Product name
-  variants: string; // Number of variants (e.g., "1 Variant", "2 Variants")
-  category: string; // Category of the product
-  price: string; // Price of the product (as a string with currency symbol)
-  // status: string; // Status of the product
-  image: string; // URL or path to the product image
-  status: "Delivered" | "Pending" | "Canceled"; // Status of the product
+interface Projects {
+  id: number; // Unique identifier for each project
+  name: string; // Project name
+  location: string; // Location of the project
+  type: string; // Type of the project (e.g., Residential, Commercial)
+  completionDate: string; // Expected or actual completion date
+  status: "Completed" | "In Progress" | "On Hold"; // Status of the project
+  image: string; // URL or path to the project image
 }
 
 // Define the table data using the interface
-const tableData: Product[] = [
+const tableData: Projects[] = [
   {
     id: 1,
-    name: "MacBook Pro 13”",
-    variants: "2 Variants",
-    category: "Laptop",
-    price: "$2399.00",
-    status: "Delivered",
-    image: "/images/product/product-01.jpg", // Replace with actual image URL
+    name: "YAS ACRES",
+    location: "Abu Dhabi",
+    type: "Residential",
+    completionDate: "2023-12-31",
+    status: "Completed",
+    image: "https://cdn.prod.website-files.com/65b8ae9b3af43cf735dab067/65ca07f0e80b55e2f8589b84_65b8ae9b3af43cf735dac580_64e8660a745bb8e444d4fcf9_64a2a8f1fcd8c1949a14f6bf_gallery_4.webp", // Replace with actual image URL
   },
   {
     id: 2,
-    name: "Apple Watch Ultra",
-    variants: "1 Variant",
-    category: "Watch",
-    price: "$879.00",
-    status: "Pending",
-    image: "/images/product/product-02.jpg", // Replace with actual image URL
+    name: "Dubai Marina Complex",
+    location: "Dubai",
+    type: "Commercial",
+    completionDate: "2024-06-30",
+    status: "In Progress",
+    image: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/164648677.jpg?k=d55e8a672df63892bb63a0e951c6ce838340942bc7bd736afa7ce21674d48413&o=&hp=1", // Replace with actual image URL
   },
   {
     id: 3,
-    name: "iPhone 15 Pro Max",
-    variants: "2 Variants",
-    category: "SmartPhone",
-    price: "$1869.00",
-    status: "Delivered",
-    image: "/images/product/product-03.jpg", // Replace with actual image URL
+    name: "ROVE HOTEL",
+    location: "Dubai",
+    type: "Hospitality",
+    completionDate: "2025-01-15",
+    status: "On Hold",
+    image: "https://d3mgaxfqdimhxa.cloudfront.net/wp-content/uploads/2021/03/1920x1280-56-1000x667.jpg", // Replace with actual image URL
   },
   {
     id: 4,
-    name: "iPad Pro 3rd Gen",
-    variants: "2 Variants",
-    category: "Electronics",
-    price: "$1699.00",
-    status: "Canceled",
-    image: "/images/product/product-04.jpg", // Replace with actual image URL
+    name: "Ajman Waterfront Residences",
+    location: "Ajman",
+    type: "Residential",
+    completionDate: "2024-09-01",
+    status: "In Progress",
+    image: "https://www.propertyfinder.ae/property/0ca2dc83bfc8de9871498512b3497285/416/272/MODE/92d191/13606645-9adedo.webp?ctr=ae", // Replace with actual image URL
   },
-  {
-    id: 5,
-    name: "AirPods Pro 2nd Gen",
-    variants: "1 Variant",
-    category: "Accessories",
-    price: "$240.00",
-    status: "Delivered",
-    image: "/images/product/product-05.jpg", // Replace with actual image URL
-  },
+  // {
+  //   id: 5,
+  //   name: "Ras Al Khaimah Mall",
+  //   location: "Ras Al Khaimah",
+  //   type: "Commercial",
+  //   completionDate: "2025-03-01",
+  //   status: "In Progress",
+  //   image: "/images/projects/project-05.jpg", // Replace with actual image URL
+  // },
 ];
 
-export default function RecentOrders() {
+export default function RecentProjects() {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Recent Orders
+            Recent Projects
           </h3>
         </div>
 
@@ -131,19 +130,25 @@ export default function RecentOrders() {
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Products
+                Project Name
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Category
+                Location
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Price
+                Type
+              </TableCell>
+              <TableCell
+                isHeader
+                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Completion Date
               </TableCell>
               <TableCell
                 isHeader
@@ -157,45 +162,48 @@ export default function RecentOrders() {
           {/* Table Body */}
 
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {tableData.map((product) => (
-              <TableRow key={product.id} className="">
+            {tableData.map((project) => (
+              <TableRow key={project.id} className="">
                 <TableCell className="py-3">
                   <div className="flex items-center gap-3">
                     <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
                       <img
-                        src={product.image}
+                        src={project.image}
                         className="h-[50px] w-[50px]"
-                        alt={product.name}
+                        alt={project.name}
                       />
                     </div>
                     <div>
                       <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {product.name}
+                        {project.name}
                       </p>
                       <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                        {product.variants}
+                        {project.location}
                       </span>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {product.price}
+                  {project.location}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {product.category}
+                  {project.type}
+                </TableCell>
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  {project.completionDate}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   <Badge
                     size="sm"
                     color={
-                      product.status === "Delivered"
+                      project.status === "Completed"
                         ? "success"
-                        : product.status === "Pending"
+                        : project.status === "In Progress"
                         ? "warning"
                         : "error"
                     }
                   >
-                    {product.status}
+                    {project.status}
                   </Badge>
                 </TableCell>
               </TableRow>
