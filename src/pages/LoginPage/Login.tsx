@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useLoginUserMutation } from "../../services/authApi";
 import { useNavigate } from "react-router-dom";
-import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
-import "./Login.css"; // Import the new CSS file
+import "./Login.css"; // Import the CSS file for styling
 import logo from "../../assets/images/logo-dark.png"; // Adjust the path for your logo
 
 const Login: React.FC = () => {
@@ -26,36 +25,38 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
-      <Container className="d-flex justify-content-center align-items-center vh-100">
-        <div className="login-box col-4">
+      <div className="login-container">
+        <div className="login-box">
           <img src={logo} alt="Logo" className="login-logo" />
-          <Form onSubmit={handleSubmit} className="p-4">
-            <h3 className="text-center">Login</h3>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <Form.Group>
-              <Form.Label>Username</Form.Label>
-              <Form.Control
+          <form onSubmit={handleSubmit} className="login-form">
+            <h3 className="login-title">Login</h3>
+            {error && <div className="login-error">{error}</div>}
+            <div className="form-group">
+              <label htmlFor="username">Username</label>
+              <input
                 type="text"
+                id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Password</Form.Label>
-              <Form.Control
+            </div>
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
                 type="password"
+                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-            </Form.Group>
-            <Button type="submit" disabled={isLoading} className="mt-3 w-100">
-              {isLoading ? <Spinner animation="border" size="sm" /> : "Login"}
-            </Button>
-          </Form>
+            </div>
+            <button type="submit" disabled={isLoading} className="login-button">
+              {isLoading ? <div className="spinner"></div> : "Login"}
+            </button>
+          </form>
         </div>
-      </Container>
+      </div>
     </div>
   );
 };

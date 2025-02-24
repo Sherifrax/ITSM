@@ -25,7 +25,7 @@ export default function UserInfoCard() {
                 First Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
+                Abdalrahman
               </p>
             </div>
 
@@ -34,7 +34,7 @@ export default function UserInfoCard() {
                 Last Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Chowdhury
+                Elsaid
               </p>
             </div>
 
@@ -52,7 +52,7 @@ export default function UserInfoCard() {
                 Phone
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +09 363 398 46
+                +971 50 307 5044
               </p>
             </div>
 
@@ -61,7 +61,7 @@ export default function UserInfoCard() {
                 Bio
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Team Manager
+                Junior Software Engineer
               </p>
             </div>
           </div>
