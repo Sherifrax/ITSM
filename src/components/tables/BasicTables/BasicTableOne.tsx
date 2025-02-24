@@ -1,260 +1,159 @@
 import { useState } from "react";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHeader,
-    TableRow,
-  } from "../../ui/table";
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "../../ui/table";
 import Badge from "../../ui/badge/Badge";
 import Button from "../../ui/button";
 import { Modal } from "../../ui/modal";
-  
-  interface Order {
-    id: number;
-    user: {
-      image: string;
-      name: string;
-      role: string;
-    };
-    projectName: string;
-    team: {
-      images: string[];
-    };
-    status: string;
-    budget: string;
-  }
-  
-  // Define the table data using the interface
-  const tableData: Order[] = [
-    {
-      id: 1,
-      user: {
-        image: "/images/user/user-17.jpg",
-        name: "Lindsey Curtis",
-        role: "Web Designer",
-      },
-      projectName: "Agency Website",
-      team: {
-        images: [
-          "/images/user/user-22.jpg",
-          "/images/user/user-23.jpg",
-          "/images/user/user-24.jpg",
-        ],
-      },
-      budget: "3.9K",
-      status: "Active",
-    },
-    {
-      id: 2,
-      user: {
-        image: "/images/user/user-18.jpg",
-        name: "Kaiya George",
-        role: "Project Manager",
-      },
-      projectName: "Technology",
-      team: {
-        images: ["/images/user/user-25.jpg", "/images/user/user-26.jpg"],
-      },
-      budget: "24.9K",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      user: {
-        image: "/images/user/user-17.jpg",
-        name: "Zain Geidt",
-        role: "Content Writing",
-      },
-      projectName: "Blog Writing",
-      team: {
-        images: ["/images/user/user-27.jpg"],
-      },
-      budget: "12.7K",
-      status: "Active",
-    },
-    {
-      id: 4,
-      user: {
-        image: "/images/user/user-20.jpg",
-        name: "Abram Schleifer",
-        role: "Digital Marketer",
-      },
-      projectName: "Social Media",
-      team: {
-        images: [
-          "/images/user/user-28.jpg",
-          "/images/user/user-29.jpg",
-          "/images/user/user-30.jpg",
-        ],
-      },
-      budget: "2.8K",
-      status: "Cancel",
-    },
-    {
-      id: 5,
-      user: {
-        image: "/images/user/user-21.jpg",
-        name: "Carla George",
-        role: "Front-end Developer",
-      },
-      projectName: "Website",
-      team: {
-        images: [
-          "/images/user/user-31.jpg",
-          "/images/user/user-32.jpg",
-          "/images/user/user-33.jpg",
-        ],
-      },
-      budget: "4.5K",
-      status: "Active",
-    },
-  ];
-  
-  export default function BasicTableOne() {
-    const [deleteId, setDeleteId] = useState<number | null>(null);
 
-    const handleDelete = () => {
-      if (deleteId) {
-        // TODO: Implement delete functionality
-        setDeleteId(null);
-      }
-    };
+interface User {
+  id: number;
+  name: string;
+  position: string;
+  address: string;
+  salary: number;
+  phone: string;
+}
 
-    const handleEdit = (order: Order) => {
-      // TODO: Implement edit functionality
-    };
+export default function BasicTableOne({
+  users,
+  onDelete,
+  onEdit,
+}: {
+  users: User[];
+  onDelete: (id: number) => void;
+  onEdit: (user: User) => void;
+}) {
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
-    return (
-      <>
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-          <div className="max-w-full overflow-x-auto">
-            <div className="min-w-[1102px]">
-              <Table>
-                {/* Table Header */}
-                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                  <TableRow>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      User
+  const handleDelete = () => {
+    if (deleteId) {
+      onDelete(deleteId);
+      setDeleteId(null);
+    }
+  };
+
+  return (
+    <>
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <div className="min-w-[1102px]">
+            <Table>
+              {/* Table Header */}
+              <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                <TableRow>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Name
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Position
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Address
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Salary
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Phone
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Actions
+                  </TableCell>
+                </TableRow>
+              </TableHeader>
+
+              {/* Table Body */}
+              <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start">
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                            {user.name}
+                          </span>
+                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Project Name
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {user.position}
                     </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Status
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {user.address}
                     </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Salary
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      ${user.salary}
                     </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Actions
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {user.phone}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      <div className="flex gap-2">
+                        <Button
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
+                          onClick={() => onEdit(user)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5"
+                          onClick={() => setDeleteId(user.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                </TableHeader>
-
-                {/* Table Body */}
-                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                  {tableData.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="px-5 py-4 sm:px-6 text-start">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 overflow-hidden rounded-full">
-                            <img
-                              width={40}
-                              height={40}
-                              src={order.user.image}
-                              alt={order.user.name}
-                            />
-                          </div>
-                          <div>
-                            <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                              {order.user.name}
-                            </span>
-                            <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                              {order.user.role}
-                            </span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        {order.projectName}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        <Badge
-                          size="sm"
-                          color={
-                            order.status === "Active"
-                              ? "success"
-                              : order.status === "Pending"
-                              ? "warning"
-                              : "error"
-                          }
-                        >
-                          {order.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                        {order.budget}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                        <div className="flex gap-2">
-                          <Button
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
-                            onClick={() => handleEdit(order)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5"
-                            onClick={() => setDeleteId(order.id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
+      </div>
 
-        <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)}>
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
-            <p className="mb-6">Are you sure you want to delete this user?</p>
-            <div className="flex justify-end space-x-4">
-              <Button
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800"
-                onClick={() => setDeleteId(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="bg-red-500 hover:bg-red-600 text-white"
-                onClick={handleDelete}
-              >
-                Delete
-              </Button>
-            </div>
+      <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)}>
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
+          <p className="mb-6">Are you sure you want to delete this user?</p>
+          <div className="flex justify-end space-x-4">
+            <Button
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800"
+              onClick={() => setDeleteId(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
           </div>
-        </Modal>
-      </>
-    );
-  }
+        </div>
+      </Modal>
+    </>
+  );
+}

@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ onClick, onToggle }) => {
             className="block w-10 h-10 text-gray-500 lg:hidden dark:text-gray-400"
             onClick={onToggle}
           >
-            {/* Hamburger Icon */}
+            Hamburger Icon
             <svg
               className={`block`}
               width="16"

@@ -94,6 +94,7 @@ const AppHeader: React.FC = () => {
               className="hidden dark:block"
               src="./images/logo/logo-dark.png"
               alt="Logo"
+              width={170}
             />
           </Link>
 
