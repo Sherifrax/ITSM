@@ -1,7 +1,6 @@
 import { useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
-import PageMeta from "../../components/common/PageMeta";
 import BasicTableOne from "../../components/tables/BasicTables/BasicTableOne";
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button";
@@ -128,10 +127,6 @@ export default function UserManagement() {
 
   return (
     <>
-      <PageMeta
-        title="Users Management"
-        description="This is the page for managing existing users, adding new users or removing current users"
-      />
       <PageBreadcrumb pageTitle="Users Management" />
       <div className="space-y-4">
         {/* Search and Filters */}
@@ -213,12 +208,12 @@ export default function UserManagement() {
       {/* Add/Edit User Modal */}
       <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
         <form onSubmit={handleSubmit} className="p-6">
-          <h2 className="text-xl font-semibold mb-6">
+          <h2 className="text-xl font-semibold mb-6 dark:text-white/90">
             {formData.id === 0 ? "Add New User" : "Edit User"}
           </h2>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Name</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Name</label>
             <input
               type="text"
               name="name"
@@ -234,7 +229,7 @@ export default function UserManagement() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Position</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Position</label>
             <input
               type="text"
               name="position"
@@ -250,7 +245,7 @@ export default function UserManagement() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Address</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Address</label>
             <input
               type="text"
               name="address"
@@ -261,7 +256,7 @@ export default function UserManagement() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Salary</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Salary</label>
             <input
               type="number"
               name="salary"
@@ -272,7 +267,7 @@ export default function UserManagement() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">Phone</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Phone</label>
             <input
               type="text"
               name="phone"

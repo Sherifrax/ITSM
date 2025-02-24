@@ -136,8 +136,8 @@ export default function BasicTableOne({
 
       <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)}>
         <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
-          <p className="mb-6">Are you sure you want to delete this user?</p>
+          <h2 className="text-xl font-semibold mb-4 dark:text-gray-400">Confirm Deletion</h2>
+          <p className="mb-6 dark:text-red-400">Are you sure you want to delete this user?</p>
           <div className="flex justify-end space-x-4">
             <Button
               className="bg-gray-300 hover:bg-gray-400 text-gray-800"
