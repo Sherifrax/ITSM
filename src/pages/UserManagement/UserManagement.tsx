@@ -187,7 +187,7 @@ export default function UserManagement() {
           >
             {"<"}
           </Button>
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2 dark:text-white/40">
             Page {currentPage} of {totalPages}
           </span>
           <Button
