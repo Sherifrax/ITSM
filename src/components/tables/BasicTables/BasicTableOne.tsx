@@ -6,34 +6,33 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
-import Badge from "../../ui/badge/Badge";
 import Button from "../../ui/button";
 import { Modal } from "../../ui/modal";
 
-interface User {
-  id: number;
-  name: string;
-  position: string;
-  address: string;
-  salary: number;
-  phone: string;
+interface ApiKey {
+  apiKey: string;
+  clientName: string;
+  isActive: boolean;
+  isIpCheck: boolean;
+  isCountryCheck: boolean;
+  isRegionCheck: boolean;
 }
 
 export default function BasicTableOne({
-  users,
+  apiKeys,
   onDelete,
   onEdit,
 }: {
-  users: User[];
-  onDelete: (id: number) => void;
-  onEdit: (user: User) => void;
+  apiKeys: ApiKey[];
+  onDelete: (apiKey: string) => void;
+  onEdit: (apiKey: ApiKey) => void;
 }) {
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteApiKey, setDeleteApiKey] = useState<string | null>(null);
 
   const handleDelete = () => {
-    if (deleteId) {
-      onDelete(deleteId);
-      setDeleteId(null);
+    if (deleteApiKey) {
+      onDelete(deleteApiKey);
+      setDeleteApiKey(null);
     }
   };
 
@@ -43,38 +42,37 @@ export default function BasicTableOne({
         <div className="max-w-full overflow-x-auto">
           <div className="min-w-[1102px]">
             <Table>
-              {/* Table Header */}
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
                   <TableCell
                     isHeader
                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                   >
-                    Name
+                    Client Name
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                   >
-                    Position
+                    Active
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                   >
-                    Address
+                    IP Check
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                   >
-                    Salary
+                    Country Check
                   </TableCell>
                   <TableCell
                     isHeader
                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                   >
-                    Phone
+                    Region Check
                   </TableCell>
                   <TableCell
                     isHeader
@@ -85,42 +83,41 @@ export default function BasicTableOne({
                 </TableRow>
               </TableHeader>
 
-              {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {users.map((user) => (
-                  <TableRow key={user.id}>
+                {apiKeys.map((apiKey) => (
+                  <TableRow key={apiKey.apiKey}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
                         <div>
                           <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                            {user.name}
+                            {apiKey.clientName}
                           </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {user.position}
+                      {apiKey.isActive ? "Yes" : "No"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {user.address}
+                      {apiKey.isIpCheck ? "Yes" : "No"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      ${user.salary}
+                      {apiKey.isCountryCheck ? "Yes" : "No"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {user.phone}
+                      {apiKey.isRegionCheck ? "Yes" : "No"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       <div className="flex gap-2">
                         <Button
                           className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
-                          onClick={() => onEdit(user)}
+                          onClick={() => onEdit(apiKey)}
                         >
                           Edit
                         </Button>
                         <Button
                           className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5"
-                          onClick={() => setDeleteId(user.id)}
+                          onClick={() => setDeleteApiKey(apiKey.apiKey)}
                         >
                           Delete
                         </Button>
@@ -134,14 +131,14 @@ export default function BasicTableOne({
         </div>
       </div>
 
-      <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)} className="max-w-sm">
+      <Modal isOpen={deleteApiKey !== null} onClose={() => setDeleteApiKey(null)} className="max-w-sm">
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-4 dark:text-gray-400">Confirm Deletion</h2>
-          <p className="mb-6 dark:text-red-400">Are you sure you want to delete this user?</p>
+          <p className="mb-6 dark:text-red-400">Are you sure you want to delete this API key?</p>
           <div className="flex justify-end space-x-4">
             <Button
               className="bg-gray-300 hover:bg-gray-400 text-gray-800"
-              onClick={() => setDeleteId(null)}
+              onClick={() => setDeleteApiKey(null)}
             >
               Cancel
             </Button>

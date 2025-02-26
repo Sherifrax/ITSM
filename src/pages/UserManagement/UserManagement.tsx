@@ -1,88 +1,158 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import BasicTableOne from "../../components/tables/BasicTables/BasicTableOne";
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button";
-import usersData from './users.json'; // Adjust the path to your JSON file
 
-interface User {
-  id: number;
-  name: string;
-  position: string;
-  address: string;
-  salary: number;
-  phone: string;
+interface ApiKey {
+  apiKey: string;
+  clientName: string;
+  isActive: boolean;
+  isIpCheck: boolean;
+  isCountryCheck: boolean;
+  isRegionCheck: boolean;
 }
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<User[]>(usersData.users);
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formData, setFormData] = useState<User>({
-    id: 0,
-    name: "",
-    position: "",
-    address: "",
-    salary: 0,
-    phone: "",
+  const [formData, setFormData] = useState<ApiKey>({
+    apiKey: "",
+    clientName: "",
+    isActive: false,
+    isIpCheck: false,
+    isCountryCheck: false,
+    isRegionCheck: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortField, setSortField] = useState<keyof User>("name");
+  const [sortField, setSortField] = useState<keyof ApiKey>("clientName");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const usersPerPage = 10;
+  const apiKeysPerPage = 10;
 
-  // Filter users based on search query
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.phone.includes(searchQuery)
-  );
+  // Retrieve the token from localStorage
+  const token = localStorage.getItem("token");
 
-  // Sort users based on selected field and order
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
-    if (a[sortField] < b[sortField]) return sortOrder === "asc" ? -1 : 1;
-    if (a[sortField] > b[sortField]) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
+  useEffect(() => {
+    if (token) {
+      fetchApiKeys();
+    }
+  }, [token]);
 
-  // Pagination logic
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = sortedUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
+  const fetchApiKeys = async () => {
+    try {
+      const response = await fetch(
+        "http://10.20.20.54:5259/api/key/Get?apiKey=4764be7d-c397-4268-85d4-268e7e6d2f1d",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Failed to fetch API keys");
+      }
+  
+      const data = await response.json();
+      // Assuming the API returns an object with a 'keys' property that is an array
+      setApiKeys(data.keys || []);
+    } catch (error) {
+      console.error("Error fetching API keys:", error);
+    }
   };
 
-  const handleSortFieldChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortField(e.target.value as keyof User);
-    setCurrentPage(1); // Reset to first page on new sort
+  // Search API keys
+  const searchApiKeys = async () => {
+    try {
+      const response = await fetch(
+        `http://10.20.20.54:5259/api/key/Search?clientName=${searchQuery}&isActive=-1&isIpCheck=-1&isCountryCheck=-1&isRegionCheck=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to search API keys");
+      }
+
+      const data = await response.json();
+      setApiKeys(data);
+    } catch (error) {
+      console.error("Error searching API keys:", error);
+    }
   };
 
-  const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortOrder(e.target.value as "asc" | "desc");
-    setCurrentPage(1); // Reset to first page on new sort
+  // Handle form submission (add/edit API key)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm()) {
+      try {
+        const response = await fetch("http://10.20.20.54:5259/api/key/save", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save API key");
+        }
+
+        fetchApiKeys(); // Refresh the list after saving
+        setIsFormOpen(false);
+        setFormData({
+          apiKey: "",
+          clientName: "",
+          isActive: false,
+          isIpCheck: false,
+          isCountryCheck: false,
+          isRegionCheck: false,
+        });
+      } catch (error) {
+        console.error("Error saving API key:", error);
+      }
+    }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  // Handle deletion of an API key
+  const handleDelete = async (apiKey: string) => {
+    try {
+      const response = await fetch(
+        `http://10.20.20.54:5259/api/key/delete?apiKey=${apiKey}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete API key");
+      }
+
+      fetchApiKeys(); // Refresh the list after deletion
+    } catch (error) {
+      console.error("Error deleting API key:", error);
+    }
   };
 
+  // Validate form fields
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.position) newErrors.position = "Position is required";
-    if (!formData.phone) newErrors.phone = "Phone is required";
+    if (!formData.clientName) newErrors.clientName = "Client Name is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle input changes in the form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -91,49 +161,53 @@ export default function UserManagement() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      if (formData.id === 0) {
-        // Add new user
-        const newUser = { ...formData, id: users.length + 1 };
-        setUsers((prev) => [...prev, newUser]);
-      } else {
-        // Edit existing user
-        setUsers((prev) =>
-          prev.map((user) => (user.id === formData.id ? formData : user))
-        );
-      }
-      setIsFormOpen(false);
-      setFormData({
-        id: 0,
-        name: "",
-        position: "",
-        address: "",
-        salary: 0,
-        phone: "",
-      });
-    }
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
 
-  const handleDelete = (id: number) => {
-    setUsers((prev) => prev.filter((user) => user.id !== id));
+  // Handle sorting
+  const handleSortFieldChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortField(e.target.value as keyof ApiKey);
+    setCurrentPage(1);
   };
 
-  const handleEdit = (user: User) => {
-    setFormData(user);
-    setIsFormOpen(true);
+  const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortOrder(e.target.value as "asc" | "desc");
+    setCurrentPage(1);
   };
+
+  // Handle pagination
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Filter and sort API keys
+  const filteredApiKeys = apiKeys.filter((key) =>
+    key.clientName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sortedApiKeys = [...filteredApiKeys].sort((a, b) => {
+    if (a[sortField] < b[sortField]) return sortOrder === "asc" ? -1 : 1;
+    if (a[sortField] > b[sortField]) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const indexOfLastApiKey = currentPage * apiKeysPerPage;
+  const indexOfFirstApiKey = indexOfLastApiKey - apiKeysPerPage;
+  const currentApiKeys = sortedApiKeys.slice(indexOfFirstApiKey, indexOfLastApiKey);
+  const totalPages = Math.ceil(sortedApiKeys.length / apiKeysPerPage);
 
   return (
     <>
-      <PageBreadcrumb pageTitle="Users Management" />
+      <PageBreadcrumb pageTitle="API Key Management" />
       <div className="space-y-4">
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <input
             type="text"
-            placeholder="Search by name, position, address, or phone..."
+            placeholder="Search by client name..."
             value={searchQuery}
             onChange={handleSearchChange}
             className="w-full md:w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -144,9 +218,11 @@ export default function UserManagement() {
               onChange={handleSortFieldChange}
               className="p-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="name">Name</option>
-              <option value="position">Position</option>
-              <option value="salary">Salary</option>
+              <option value="clientName">Client Name</option>
+              <option value="isActive">Active</option>
+              <option value="isIpCheck">IP Check</option>
+              <option value="isCountryCheck">Country Check</option>
+              <option value="isRegionCheck">Region Check</option>
             </select>
             <select
               value={sortOrder}
@@ -159,17 +235,20 @@ export default function UserManagement() {
           </div>
         </div>
 
-        {/* Add User Button */}
+        {/* Add API Key Button */}
         <div className="flex justify-end">
-          <Button onClick={() => setIsFormOpen(true)}>Add User</Button>
+          <Button onClick={() => setIsFormOpen(true)}>Add API Key</Button>
         </div>
 
         {/* Table */}
-        <ComponentCard title="Manage Users">
+        <ComponentCard title="Manage API Keys">
           <BasicTableOne
-            users={currentUsers}
+            apiKeys={currentApiKeys}
             onDelete={handleDelete}
-            onEdit={handleEdit}
+            onEdit={(apiKey) => {
+              setFormData(apiKey);
+              setIsFormOpen(true);
+            }}
           />
         </ComponentCard>
 
@@ -205,81 +284,79 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* Add/Edit User Modal */}
+      {/* Add/Edit API Key Modal */}
       <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} className="max-w-md">
-        <form onSubmit={handleSubmit} className="p-6 ">
+        <form onSubmit={handleSubmit} className="p-6">
           <h2 className="text-xl font-semibold mb-6 dark:text-white/90">
-            {formData.id === 0 ? "Add New User" : "Edit User"}
+            {formData.apiKey ? "Edit API Key" : "Add New API Key"}
           </h2>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Name</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Client Name</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="clientName"
+              value={formData.clientName}
               onChange={handleInputChange}
               className={`w-full p-2 border rounded ${
-                errors.name ? "border-red-500" : "border-gray-300"
+                errors.clientName ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            {errors.clientName && (
+              <p className="text-red-500 text-sm mt-1">{errors.clientName}</p>
             )}
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Position</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Active</label>
             <input
-              type="text"
-              name="position"
-              value={formData.position}
-              onChange={handleInputChange}
-              className={`w-full p-2 border rounded ${
-                errors.position ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {errors.position && (
-              <p className="text-red-500 text-sm mt-1">{errors.position}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Address</label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              className="w-full p-2 border border-gray-300 rounded"
+              type="checkbox"
+              name="isActive"
+              checked={formData.isActive}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, isActive: e.target.checked }))
+              }
+              className="w-5 h-5"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Salary</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">IP Check</label>
             <input
-              type="number"
-              name="salary"
-              value={formData.salary}
-              onChange={handleInputChange}
-              className="w-full p-2 border border-gray-300 rounded"
+              type="checkbox"
+              name="isIpCheck"
+              checked={formData.isIpCheck}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, isIpCheck: e.target.checked }))
+              }
+              className="w-5 h-5"
             />
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Phone</label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Country Check</label>
             <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className={`w-full p-2 border rounded ${
-                errors.phone ? "border-red-500" : "border-gray-300"
-              }`}
+              type="checkbox"
+              name="isCountryCheck"
+              checked={formData.isCountryCheck}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, isCountryCheck: e.target.checked }))
+              }
+              className="w-5 h-5"
             />
-            {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-            )}
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Region Check</label>
+            <input
+              type="checkbox"
+              name="isRegionCheck"
+              checked={formData.isRegionCheck}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, isRegionCheck: e.target.checked }))
+              }
+              className="w-5 h-5"
+            />
           </div>
 
           <div className="flex justify-end space-x-4">
