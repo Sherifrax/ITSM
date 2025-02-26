@@ -58,7 +58,7 @@ const App: React.FC = () => {
           </Route>
 
           {/* Auth Layout */}
-          <Route path="/signin" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
 
           {/* Fallback Route */}
