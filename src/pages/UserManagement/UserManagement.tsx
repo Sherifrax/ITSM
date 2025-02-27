@@ -17,6 +17,7 @@ interface ApiKey {
 export default function UserManagement() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [formData, setFormData] = useState<ApiKey>({
     apiKey: "",
     clientName: "",
@@ -27,12 +28,15 @@ export default function UserManagement() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortField, setSortField] = useState<keyof ApiKey>("clientName");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [filters, setFilters] = useState({
+    isActive: false,
+    isIpCheck: false,
+    isCountryCheck: false,
+    isRegionCheck: false,
+  });
   const apiKeysPerPage = 10;
 
-  // Retrieve the token from localStorage
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -51,47 +55,31 @@ export default function UserManagement() {
           },
         }
       );
-  
-      if (!response.ok) {
-        throw new Error("Failed to fetch API keys");
-      }
-  
+
+      if (!response.ok) throw new Error("Failed to fetch API keys");
+
       const data = await response.json();
-      // Assuming the API returns an object with a 'keys' property that is an array
-      setApiKeys(data.keys || []);
+      console.log("API Keys Response:", data);
+
+      // If the response is a single object, wrap it in an array
+      if (data && typeof data === "object" && !Array.isArray(data)) {
+        setApiKeys([data]);
+      } else if (Array.isArray(data)) {
+        setApiKeys(data);
+      } else {
+        console.error("Unexpected API response format:", data);
+      }
     } catch (error) {
       console.error("Error fetching API keys:", error);
     }
   };
 
-  // Search API keys
-  const searchApiKeys = async () => {
-    try {
-      const response = await fetch(
-        `http://10.20.20.54:5259/api/key/Search?clientName=${searchQuery}&isActive=-1&isIpCheck=-1&isCountryCheck=-1&isRegionCheck=10`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to search API keys");
-      }
-
-      const data = await response.json();
-      setApiKeys(data);
-    } catch (error) {
-      console.error("Error searching API keys:", error);
-    }
-  };
-
-  // Handle form submission (add/edit API key)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       try {
+        console.log("Saving API Key with data:", formData); // Log the form data
+
         const response = await fetch("http://10.20.20.54:5259/api/key/save", {
           method: "POST",
           headers: {
@@ -102,8 +90,13 @@ export default function UserManagement() {
         });
 
         if (!response.ok) {
+          const errorResponse = await response.json();
+          console.error("Error response from server:", errorResponse);
           throw new Error("Failed to save API key");
         }
+
+        const responseData = await response.json();
+        console.log("Save API Key Response:", responseData);
 
         fetchApiKeys(); // Refresh the list after saving
         setIsFormOpen(false);
@@ -121,9 +114,10 @@ export default function UserManagement() {
     }
   };
 
-  // Handle deletion of an API key
   const handleDelete = async (apiKey: string) => {
     try {
+      console.log("Deleting API Key:", apiKey); // Log the API key being deleted
+
       const response = await fetch(
         `http://10.20.20.54:5259/api/key/delete?apiKey=${apiKey}`,
         {
@@ -135,6 +129,8 @@ export default function UserManagement() {
       );
 
       if (!response.ok) {
+        const errorResponse = await response.json();
+        console.error("Error response from server:", errorResponse);
         throw new Error("Failed to delete API key");
       }
 
@@ -144,7 +140,6 @@ export default function UserManagement() {
     }
   };
 
-  // Validate form fields
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.clientName) newErrors.clientName = "Client Name is required";
@@ -152,95 +147,159 @@ export default function UserManagement() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle input changes in the form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Handle search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   };
 
-  // Handle sorting
-  const handleSortFieldChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortField(e.target.value as keyof ApiKey);
-    setCurrentPage(1);
-  };
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
-  const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortOrder(e.target.value as "asc" | "desc");
-    setCurrentPage(1);
-  };
+  const filteredApiKeys = apiKeys.filter((key) => {
+    const matchesSearch = key.clientName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesActive = !filters.isActive || key.isActive;
+    const matchesIpCheck = !filters.isIpCheck || key.isIpCheck;
+    const matchesCountryCheck = !filters.isCountryCheck || key.isCountryCheck;
+    const matchesRegionCheck = !filters.isRegionCheck || key.isRegionCheck;
 
-  // Handle pagination
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // Filter and sort API keys
-  const filteredApiKeys = apiKeys.filter((key) =>
-    key.clientName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const sortedApiKeys = [...filteredApiKeys].sort((a, b) => {
-    if (a[sortField] < b[sortField]) return sortOrder === "asc" ? -1 : 1;
-    if (a[sortField] > b[sortField]) return sortOrder === "asc" ? 1 : -1;
-    return 0;
+    return matchesSearch && matchesActive && matchesIpCheck && matchesCountryCheck && matchesRegionCheck;
   });
 
-  const indexOfLastApiKey = currentPage * apiKeysPerPage;
-  const indexOfFirstApiKey = indexOfLastApiKey - apiKeysPerPage;
-  const currentApiKeys = sortedApiKeys.slice(indexOfFirstApiKey, indexOfLastApiKey);
-  const totalPages = Math.ceil(sortedApiKeys.length / apiKeysPerPage);
+  const totalPages = Math.ceil(filteredApiKeys.length / apiKeysPerPage);
+  const currentApiKeys = filteredApiKeys.slice(
+    (currentPage - 1) * apiKeysPerPage,
+    currentPage * apiKeysPerPage
+  );
 
   return (
     <>
       <PageBreadcrumb pageTitle="API Key Management" />
-      <div className="space-y-4">
-        {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-          <input
-            type="text"
-            placeholder="Search by client name..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="w-full md:w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <div className="flex gap-4">
-            <select
-              value={sortField}
-              onChange={handleSortFieldChange}
-              className="p-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <div className="space-y-4 relative">
+        {/* Enhanced Search and Filter Section */}
+        <div className="flex gap-4 items-center w-full">
+          <div className="relative flex-1">
+            <div className="flex rounded-lg shadow-sm hover:shadow-md transition-shadow w-full">
+              {/* Search Icon on the Left */}
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </span>
+              {/* Search Input */}
+              <input
+                type="text"
+                placeholder="Search clients..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-full py-3 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+              />
+            </div>
+          </div>
+          {/* Filter Button */}
+          <Button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="px-6 py-3 border rounded-lg bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-700 transition-colors"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <option value="clientName">Client Name</option>
-              <option value="isActive">Active</option>
-              <option value="isIpCheck">IP Check</option>
-              <option value="isCountryCheck">Country Check</option>
-              <option value="isRegionCheck">Region Check</option>
-            </select>
-            <select
-              value={sortOrder}
-              onChange={handleSortOrderChange}
-              className="p-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+              />
+            </svg>
+          </Button>
+          {/* Add New Button */}
+          <Button
+            onClick={() => setIsFormOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors text-lg"
+          >
+            <span className="pr-2 text-xl">+</span>Add
+          </Button>
+        </div>
+
+        {/* Enhanced Filter Panel */}
+        <div
+          className={`fixed top-0 right-0 h-full w-96 bg-white shadow-xl transition-transform duration-300 ease-in-out ${
+            isFilterOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+          style={{ zIndex: 1000 }}
+        >
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h3 className="text-xl font-semibold text-gray-800">Advanced Filters</h3>
+            <button
+              onClick={() => setIsFilterOpen(false)}
+              className="text-gray-400 hover:text-gray-500"
             >
-              <option value="asc">Ascending</option>
-              <option value="desc">Descending</option>
-            </select>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="p-6 space-y-6">
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-gray-500 uppercase">Status Filters</h4>
+              <div className="space-y-3">
+                {[
+                  { label: "Active", key: "isActive" },
+                  { label: "IP Check", key: "isIpCheck" },
+                  { label: "Country Check", key: "isCountryCheck" },
+                  { label: "Region Check", key: "isRegionCheck" },
+                ].map((filter) => (
+                  <label key={filter.key} className="flex items-center space-x-3 group">
+                    <input
+                      type="checkbox"
+                      checked={filters[filter.key as keyof typeof filters]}
+                      onChange={() => setFilters(prev => ({
+                        ...prev,
+                        [filter.key]: !prev[filter.key as keyof typeof filters]
+                      }))}
+                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 group-hover:border-blue-400"
+                    />
+                    <span className="text-gray-700 group-hover:text-gray-900 text-lg">{filter.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex space-x-3 border-t border-gray-200 pt-6">
+              <Button
+                onClick={() => setFilters({
+                  isActive: false,
+                  isIpCheck: false,
+                  isCountryCheck: false,
+                  isRegionCheck: false,
+                })}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 text-lg"
+              >
+                Clear All
+              </Button>
+              <Button
+                onClick={() => setIsFilterOpen(false)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg"
+              >
+                Apply Filters
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Add API Key Button */}
-        <div className="flex justify-end">
-          <Button onClick={() => setIsFormOpen(true)}>Add API Key</Button>
-        </div>
-
-        {/* Table */}
+        {/* Table and Pagination */}
         <ComponentCard title="Manage API Keys">
           <BasicTableOne
             apiKeys={currentApiKeys}
@@ -361,12 +420,12 @@ export default function UserManagement() {
 
           <div className="flex justify-end space-x-4">
             <Button
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 mr-4"
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 mr-4 px-6 py-3 text-lg"
               onClick={() => setIsFormOpen(false)}
             >
               Cancel
             </Button>
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+            <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 text-lg">
               Save
             </Button>
           </div>
