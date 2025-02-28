@@ -4,6 +4,7 @@ import ComponentCard from "../../components/common/ComponentCard";
 import BasicTableOne from "../../components/tables/BasicTables/BasicTableOne";
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button";
+import { v4 as uuidv4 } from 'uuid';
 
 interface ApiKey {
   apiKey: string;
@@ -48,57 +49,74 @@ export default function UserManagement() {
   const fetchApiKeys = async () => {
     try {
       const response = await fetch(
-        "http://10.20.20.54:5259/api/key/Get?apiKey=4764be7d-c397-4268-85d4-268e7e6d2f1d",
+        "http://10.20.20.54:5259/api/key/Search?clientName=&isActive=-1&isIpCheck=-1&isCountryCheck=-1&isRegionCheck=-1",
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
+  
       if (!response.ok) throw new Error("Failed to fetch API keys");
-
+  
       const data = await response.json();
       console.log("API Keys Response:", data);
-
-      // If the response is a single object, wrap it in an array
-      if (data && typeof data === "object" && !Array.isArray(data)) {
-        setApiKeys([data]);
-      } else if (Array.isArray(data)) {
-        setApiKeys(data);
-      } else {
-        console.error("Unexpected API response format:", data);
-      }
+  
+      setApiKeys(data); // Ensure the response is an array
     } catch (error) {
       console.error("Error fetching API keys:", error);
     }
   };
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        console.log("Saving API Key with data:", formData); // Log the form data
-
+        console.log("Saving API Key with data:", formData);
+  
+        // Generate a new UUID for the apiKey if it's empty
+        const apiKey = formData.apiKey || uuidv4();
+  
+        // Construct the payload
+        const payload = {
+          apiKey: apiKey,
+          clientName: formData.clientName,
+          isActive: formData.isActive,
+          isIpCheck: formData.isIpCheck,
+          isCountryCheck: formData.isCountryCheck,
+          isRegionCheck: formData.isRegionCheck,
+        };
+  
+        console.log("Payload being sent to API:", payload);
+  
         const response = await fetch("http://10.20.20.54:5259/api/key/save", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
-
+  
         if (!response.ok) {
           const errorResponse = await response.json();
           console.error("Error response from server:", errorResponse);
+          if (errorResponse.errors) {
+            console.error("Validation errors:", errorResponse.errors);
+          }
           throw new Error("Failed to save API key");
         }
-
+  
         const responseData = await response.json();
         console.log("Save API Key Response:", responseData);
+  
+        // Immediately update the state with the new API key
+        const newApiKey = { ...formData, apiKey: responseData.apiKey };
+        setApiKeys((prev) => [...prev, newApiKey]);
+        // Fetch API keys again to ensure the list is up-to-date
+        fetchApiKeys();
 
-        fetchApiKeys(); // Refresh the list after saving
         setIsFormOpen(false);
         setFormData({
           apiKey: "",
@@ -111,32 +129,6 @@ export default function UserManagement() {
       } catch (error) {
         console.error("Error saving API key:", error);
       }
-    }
-  };
-
-  const handleDelete = async (apiKey: string) => {
-    try {
-      console.log("Deleting API Key:", apiKey); // Log the API key being deleted
-
-      const response = await fetch(
-        `http://10.20.20.54:5259/api/key/delete?apiKey=${apiKey}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        console.error("Error response from server:", errorResponse);
-        throw new Error("Failed to delete API key");
-      }
-
-      fetchApiKeys(); // Refresh the list after deletion
-    } catch (error) {
-      console.error("Error deleting API key:", error);
     }
   };
 
@@ -210,7 +202,7 @@ export default function UserManagement() {
             className="px-6 py-3 border rounded-lg bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-700 transition-colors"
           >
             <svg
-              className="w-6 h-6"
+              className="w-6 h-6 text-gray-700 linearGradient(to right bottom, rgb(42, 142, 229), rgb(20, 13, 206)))"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -224,6 +216,7 @@ export default function UserManagement() {
             </svg>
           </Button>
           {/* Add New Button */}
+          
           <Button
             onClick={() => setIsFormOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors text-lg"
@@ -303,7 +296,7 @@ export default function UserManagement() {
         <ComponentCard title="Manage API Keys">
           <BasicTableOne
             apiKeys={currentApiKeys}
-            onDelete={handleDelete}
+            // onDelete={handleDelete}
             onEdit={(apiKey) => {
               setFormData(apiKey);
               setIsFormOpen(true);
