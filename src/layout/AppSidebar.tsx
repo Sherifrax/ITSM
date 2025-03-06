@@ -43,7 +43,7 @@ const navItems: NavItem[] = [
   {
     name: "Middleware Mapping",
     icon: <FaArrowRightArrowLeft /> ,
-    path: "/mapping"
+    path: "/url-mapping"
   },
   {
     icon: <UserCircleIcon />,

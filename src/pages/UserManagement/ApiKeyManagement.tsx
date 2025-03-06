@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
-import BasicTableOne from "../../components/tables/BasicTables/BasicTableOne";
+import BasicTableOne from "../../components/tables/BasicTables/userManagementTable";
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button";
-import { v4 as uuidv4 } from 'uuid';
+import PageMeta from "../../components/common/PageMeta";
 
 interface ApiKey {
   apiKey: string;
@@ -15,7 +16,7 @@ interface ApiKey {
   isRegionCheck: boolean;
 }
 
-export default function UserManagement() {
+export default function ApiKeyManagement() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -36,7 +37,7 @@ export default function UserManagement() {
     isCountryCheck: false,
     isRegionCheck: false,
   });
-  const apiKeysPerPage = 10;
+  const apiKeysPerPage = 8;
 
   const token = localStorage.getItem("token");
 
@@ -75,12 +76,9 @@ export default function UserManagement() {
       try {
         console.log("Saving API Key with data:", formData);
   
-        // Generate a new UUID for the apiKey if it's empty
-        const apiKey = formData.apiKey || uuidv4();
-  
         // Construct the payload
         const payload = {
-          apiKey: apiKey,
+          apiKey: formData.apiKey || null, // Include apiKey for updates
           clientName: formData.clientName,
           isActive: formData.isActive,
           isIpCheck: formData.isIpCheck,
@@ -100,23 +98,27 @@ export default function UserManagement() {
         });
   
         if (!response.ok) {
-          const errorResponse = await response.json();
-          console.error("Error response from server:", errorResponse);
-          if (errorResponse.errors) {
-            console.error("Validation errors:", errorResponse.errors);
-          }
-          throw new Error("Failed to save API key");
+          const errorText = await response.text(); // Read the response as text
+          console.error("Error response from server:", errorText);
+          throw new Error(`Failed to save API key: ${errorText}`);
         }
   
         const responseData = await response.json();
         console.log("Save API Key Response:", responseData);
   
-        // Immediately update the state with the new API key
-        const newApiKey = { ...formData, apiKey: responseData.apiKey };
-        setApiKeys((prev) => [...prev, newApiKey]);
-        // Fetch API keys again to ensure the list is up-to-date
-        fetchApiKeys();
-
+        if (formData.apiKey) {
+          // Update the existing API key in the state
+          setApiKeys((prev) =>
+            prev.map((key) =>
+              key.apiKey === formData.apiKey ? { ...formData } : key
+            )
+          );
+        } else {
+          // Add the new API key to the state
+          const newApiKey = { ...formData, apiKey: responseData.apiKey };
+          setApiKeys((prev) => [...prev, newApiKey]);
+        }
+  
         setIsFormOpen(false);
         setFormData({
           apiKey: "",
@@ -126,6 +128,9 @@ export default function UserManagement() {
           isCountryCheck: false,
           isRegionCheck: false,
         });
+  
+        // Fetch API keys again to ensure the list is up-to-date
+        fetchApiKeys();
       } catch (error) {
         console.error("Error saving API key:", error);
       }
@@ -170,6 +175,10 @@ export default function UserManagement() {
 
   return (
     <>
+      <PageMeta
+        title="Api Key Management"
+        description=""
+      />
       <PageBreadcrumb pageTitle="API Key Management" />
       <div className="space-y-4 relative">
         {/* Enhanced Search and Filter Section */}
@@ -427,3 +436,6 @@ export default function UserManagement() {
     </>
   );
 }
+
+
+

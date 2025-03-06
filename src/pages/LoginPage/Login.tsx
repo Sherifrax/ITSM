@@ -3,6 +3,7 @@ import { useLoginUserMutation } from "../../services/authApi";
 import { useNavigate } from "react-router-dom";
 import "./Login.css"; // Import the CSS file for styling
 import logo from "../../assets/images/logo-dark.png"; // Adjust the path for your logo
+import PageMeta from "../../components/common/PageMeta";
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -25,6 +26,10 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
+        <PageMeta
+        title="Login"
+        description=""
+      />
       <div className="login-container">
         <div className="login-box">
           <img src={logo} alt="Logo" className="login-logo" />

@@ -1,4 +1,4 @@
 export enum ApiLogin {
-    LOGIN = "api/Account/Login",
+    LOGIN = "api/auth/Login",
     DASHBOARD = "d-solo/dashboard",
   }
