@@ -83,7 +83,7 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link to="/" className="lg:hidden">
+          <Link to="/home" className="lg:hidden">
             <img
               className="dark:hidden"
               src="./images/logo/logo-dark.png"
@@ -118,8 +118,9 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
 
-          <div className="hidden lg:block">
-            <form>
+           <div className="hidden lg:block">
+           <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Trojan Middleware API</h1>
+            {/* <form>
               <div className="relative">
                 <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
                   <svg
@@ -150,8 +151,8 @@ const AppHeader: React.FC = () => {
                   <span> K </span>
                 </button>
               </div>
-            </form>
-          </div>
+            </form> */}
+          </div> 
         </div>
         <div
           className={`${

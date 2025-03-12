@@ -18,13 +18,13 @@ const App: React.FC = () => {
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             {/* Tables */}
             <Route path="/manage-users" element={<ApiKeyManagement />} />
             <Route path="/url-mapping" element={<UrlMapping />} />
           </Route>
           {/* Auth Layout */}
-          <Route path="/login" element={<Login />} />
+          <Route index path="/" element={<Login />} />
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>

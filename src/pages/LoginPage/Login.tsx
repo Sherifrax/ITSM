@@ -18,7 +18,7 @@ const Login: React.FC = () => {
     try {
       const response = await loginUser({ username, password }).unwrap();
       localStorage.setItem("token", response.token);
-      navigate("/");
+      navigate("/home");
     } catch (err) {
       setError("Invalid credentials. Please try again.");
     }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -7,8 +8,8 @@ import {
 } from "../../ui/table";
 import Button from "../../ui/button";
 import { FaRegEdit, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
-import { useState } from "react";
 import { HiOutlineLink } from "react-icons/hi";
+import KeyMappingModal from "./KeyMappingModal"; // Import the KeyMappingModal component
 
 interface UrlMapping {
   id: number;
@@ -17,16 +18,21 @@ interface UrlMapping {
   isactive: boolean;
 }
 
+interface UrlMappingTableProps {
+  urlMappings: UrlMapping[];
+  onEdit: (mapping: UrlMapping) => void;
+}
+
 export default function UrlMappingTable({
   urlMappings,
   onEdit,
-}: {
-  urlMappings: UrlMapping[];
-  onEdit: (mapping: UrlMapping) => void;
-}) {
+}: UrlMappingTableProps) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [isKeyMappingModalOpen, setIsKeyMappingModalOpen] = useState(false);
+  const [selectedUrlMappingId, setSelectedUrlMappingId] = useState<number | null>(null);
 
+  // Handle sorting
   const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -36,6 +42,7 @@ export default function UrlMappingTable({
     }
   };
 
+  // Sort URL mappings
   const sortedUrlMappings = [...urlMappings].sort((a, b) => {
     if (!sortColumn) return 0;
 
@@ -47,11 +54,18 @@ export default function UrlMappingTable({
     return 0;
   });
 
+  // Get sort icon
   const getSortIcon = (column: string) => {
     if (sortColumn === column) {
       return sortDirection === "asc" ? <FaSortUp /> : <FaSortDown />;
     }
     return <FaSort />;
+  };
+
+  // Handle link button click
+  const handleLinkClick = (urlMappingId: number) => {
+    setSelectedUrlMappingId(urlMappingId);
+    setIsKeyMappingModalOpen(true);
   };
 
   return (
@@ -134,10 +148,10 @@ export default function UrlMappingTable({
                       </Button>
                       <Button
                         className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1.5"
-                      // onClick={() => onEdit(mapping)}
+                        onClick={() => handleLinkClick(mapping.id)}
                       >
-<HiOutlineLink />
-</Button>
+                        <HiOutlineLink />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -146,6 +160,13 @@ export default function UrlMappingTable({
           </Table>
         </div>
       </div>
+
+      {/* Key Mapping Modal */}
+      <KeyMappingModal
+        isOpen={isKeyMappingModalOpen}
+        onClose={() => setIsKeyMappingModalOpen(false)}
+        urlMappingId={selectedUrlMappingId || 0}
+      />
     </div>
   );
 }

@@ -1,24 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-import { IoEyeSharp, IoHome } from "react-icons/io5";
 import { FaArrowRightArrowLeft } from "react-icons/fa6";
 import { GrSecure } from "react-icons/gr";
 import { ImBlocked } from "react-icons/im";
 
 // Assume these icons are imported from an icon library
 import {
-  BoxCubeIcon,
-  CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
   TableIcon,
   UserCircleIcon,
-  EyeCloseIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -33,7 +25,7 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    path: "/",
+    path: "/home",
   },
   {
     name: "User Management",
@@ -269,7 +261,7 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/">
+        <Link to="/home">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
