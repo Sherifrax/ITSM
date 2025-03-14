@@ -10,19 +10,13 @@ import Button from "../../ui/button";
 import { FaRegEdit, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { HiOutlineLink } from "react-icons/hi";
 import KeyMappingModal from "./KeyMappingModal"; // Import the KeyMappingModal component
+import { UrlMapping } from "../../../types/UrlMapping"; // Import the UrlMapping type
 
-interface UrlMapping {
-  id: number;
-  incomingurl: string;
-  mappedurl: string;
-  isactive: boolean;
-}
 
 interface UrlMappingTableProps {
   urlMappings: UrlMapping[];
   onEdit: (mapping: UrlMapping) => void;
 }
-
 export default function UrlMappingTable({
   urlMappings,
   onEdit,
@@ -49,6 +43,9 @@ export default function UrlMappingTable({
     const aValue = a[sortColumn as keyof UrlMapping];
     const bValue = b[sortColumn as keyof UrlMapping];
 
+    if (aValue === null) return sortDirection === "asc" ? -1 : 1;
+    if (bValue === null) return sortDirection === "asc" ? 1 : -1;
+    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
     if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
     if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
     return 0;
@@ -148,7 +145,7 @@ export default function UrlMappingTable({
                       </Button>
                       <Button
                         className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1.5"
-                        onClick={() => handleLinkClick(mapping.id)}
+                        onClick={() => mapping.id !== null && handleLinkClick(mapping.id)}
                       >
                         <HiOutlineLink />
                       </Button>

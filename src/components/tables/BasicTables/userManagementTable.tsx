@@ -9,7 +9,7 @@ import Button from "../../ui/button";
 import { FaRegEdit, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useState } from "react";
 interface ApiKey {
-  apiKey: string;
+  apiKey: string | null;
   clientName: string;
   isActive: boolean;
   isIpCheck: boolean;
@@ -42,6 +42,8 @@ export default function userManagementTable({
     const aValue = a[sortColumn as keyof ApiKey];
     const bValue = b[sortColumn as keyof ApiKey];
 
+    if (aValue === null) return sortDirection === "asc" ? -1 : 1;
+    if (bValue === null) return sortDirection === "asc" ? 1 : -1;
     if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
     if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
     return 0;

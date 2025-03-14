@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -7,8 +6,13 @@ import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button";
 import PageMeta from "../../components/common/PageMeta";
 
+// Import from the API service
+import { useSearchApiKeysQuery } from "../../services/ApiKey/search";
+import { useSaveApiKeyMutation } from "../../services/ApiKey/save";
+
+// Interfaces for API Key
 interface ApiKey {
-  apiKey: string;
+  apiKey: string | null;
   clientName: string;
   isActive: boolean;
   isIpCheck: boolean;
@@ -19,7 +23,7 @@ interface ApiKey {
 export default function ApiKeyManagement() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // State for filter visibility
   const [formData, setFormData] = useState<ApiKey>({
     apiKey: "",
     clientName: "",
@@ -30,113 +34,76 @@ export default function ApiKeyManagement() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [filters, setFilters] = useState({
     isActive: false,
     isIpCheck: false,
     isCountryCheck: false,
     isRegionCheck: false,
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const apiKeysPerPage = 8;
 
-  const token = localStorage.getItem("token");
+  // Use the search API hook
+  const { data: searchApiKeys, refetch } = useSearchApiKeysQuery({
+    clientName: searchQuery,
+    isActive: filters.isActive ? 1 : -1,
+    isIpCheck: filters.isIpCheck ? 1 : -1,
+    isCountryCheck: filters.isCountryCheck ? 1 : -1,
+    isRegionCheck: filters.isRegionCheck ? 1 : -1,
+  });
+
+  // Use the save API mutation hook
+  const [saveApiKey] = useSaveApiKeyMutation();
 
   useEffect(() => {
-    if (token) {
-      fetchApiKeys();
+    if (searchApiKeys) {
+      setApiKeys(searchApiKeys);
     }
-  }, [token]);
+  }, [searchApiKeys]);
 
-  const fetchApiKeys = async () => {
-    try {
-      const response = await fetch(
-        "http://10.20.20.54:5259/api/key/Search?clientName=&isActive=-1&isIpCheck=-1&isCountryCheck=-1&isRegionCheck=-1",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      if (!response.ok) throw new Error("Failed to fetch API keys");
-  
-      const data = await response.json();
-      console.log("API Keys Response:", data);
-  
-      setApiKeys(data); // Ensure the response is an array
-    } catch (error) {
-      console.error("Error fetching API keys:", error);
-    }
-  };
-  
-
+  // Handle form submit for saving API keys
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        console.log("Saving API Key with data:", formData);
-  
-        // Construct the payload
+        // Construct the payload, ensuring apiKey is null if not provided
         const payload = {
-          apiKey: formData.apiKey || null, // Include apiKey for updates
+          apiKey: formData.apiKey || null, // Set to null if formData.apiKey is not provided
           clientName: formData.clientName,
           isActive: formData.isActive,
           isIpCheck: formData.isIpCheck,
           isCountryCheck: formData.isCountryCheck,
           isRegionCheck: formData.isRegionCheck,
         };
-  
-        console.log("Payload being sent to API:", payload);
-  
-        const response = await fetch("http://10.20.20.54:5259/api/key/save", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        });
-  
-        if (!response.ok) {
-          const errorText = await response.text(); // Read the response as text
-          console.error("Error response from server:", errorText);
-          throw new Error(`Failed to save API key: ${errorText}`);
-        }
-  
-        const responseData = await response.json();
-        console.log("Save API Key Response:", responseData);
-  
-        if (formData.apiKey) {
-          // Update the existing API key in the state
-          setApiKeys((prev) =>
-            prev.map((key) =>
-              key.apiKey === formData.apiKey ? { ...formData } : key
-            )
-          );
-        } else {
-          // Add the new API key to the state
-          const newApiKey = { ...formData, apiKey: responseData.apiKey };
-          setApiKeys((prev) => [...prev, newApiKey]);
-        }
-  
+
+        console.log("Payload:", payload); // Debugging: Log the payload
+
+        // Call the save API
+        await saveApiKey(payload).unwrap();
+
+        // Update local state after saving
+        setApiKeys((prev) => [...prev, payload]);
+
+        // Reset form and close modal
         setIsFormOpen(false);
         setFormData({
-          apiKey: "",
+          apiKey: null, // Reset apiKey to null
           clientName: "",
           isActive: false,
           isIpCheck: false,
           isCountryCheck: false,
           isRegionCheck: false,
         });
-  
-        // Fetch API keys again to ensure the list is up-to-date
-        fetchApiKeys();
+
+        // Refetch the API keys after saving
+        refetch();
       } catch (error) {
         console.error("Error saving API key:", error);
       }
     }
   };
 
+  // Form validation
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.clientName) newErrors.clientName = "Client Name is required";
@@ -144,19 +111,27 @@ export default function ApiKeyManagement() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle form data change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page on new search
   };
 
-  const handlePageChange = (page: number) => setCurrentPage(page);
+  // Handle filter change
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: checked }));
+    setCurrentPage(1); // Reset to first page on new filter
+  };
 
+  // Filtered API Keys based on search query and filters
   const filteredApiKeys = apiKeys.filter((key) => {
     const matchesSearch = key.clientName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesActive = !filters.isActive || key.isActive;
@@ -167,6 +142,7 @@ export default function ApiKeyManagement() {
     return matchesSearch && matchesActive && matchesIpCheck && matchesCountryCheck && matchesRegionCheck;
   });
 
+  // Pagination logic
   const totalPages = Math.ceil(filteredApiKeys.length / apiKeysPerPage);
   const currentApiKeys = filteredApiKeys.slice(
     (currentPage - 1) * apiKeysPerPage,
@@ -175,10 +151,7 @@ export default function ApiKeyManagement() {
 
   return (
     <>
-      <PageMeta
-        title="Api Key Management"
-        description=""
-      />
+      <PageMeta title="Api Key Management" description="" />
       <PageBreadcrumb pageTitle="API Key Management" />
       <div className="space-y-4 relative">
         {/* Enhanced Search and Filter Section */}
@@ -224,8 +197,8 @@ export default function ApiKeyManagement() {
               />
             </svg>
           </Button>
+
           {/* Add New Button */}
-          
           <Button
             onClick={() => setIsFormOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors text-lg"
@@ -305,7 +278,6 @@ export default function ApiKeyManagement() {
         <ComponentCard title="Manage API Keys">
           <BasicTableOne
             apiKeys={currentApiKeys}
-            // onDelete={handleDelete}
             onEdit={(apiKey) => {
               setFormData(apiKey);
               setIsFormOpen(true);
@@ -316,13 +288,13 @@ export default function ApiKeyManagement() {
         {/* Pagination */}
         <div className="flex justify-center gap-2">
           <Button
-            onClick={() => handlePageChange(1)}
+            onClick={() => setCurrentPage(1)}
             disabled={currentPage === 1}
           >
             {"<<"}
           </Button>
           <Button
-            onClick={() => handlePageChange(currentPage - 1)}
+            onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
             {"<"}
@@ -331,13 +303,13 @@ export default function ApiKeyManagement() {
             Page {currentPage} of {totalPages}
           </span>
           <Button
-            onClick={() => handlePageChange(currentPage + 1)}
+            onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
             {">"}
           </Button>
           <Button
-            onClick={() => handlePageChange(totalPages)}
+            onClick={() => setCurrentPage(totalPages)}
             disabled={currentPage === totalPages}
           >
             {">>"}
@@ -436,6 +408,3 @@ export default function ApiKeyManagement() {
     </>
   );
 }
-
-
-

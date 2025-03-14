@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -6,9 +5,12 @@ import UrlMappingTable from "../../components/tables/BasicTables/UrlMappingTable
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button";
 import PageMeta from "../../components/common/PageMeta";
+import { useSaveUrlMappingMutation } from "../../services/UrlMapping/save";
+import { useSearchUrlMappingsQuery } from "../../services/UrlMapping/search";
 
+// Interfaces for URL Mapping
 interface UrlMapping {
-  id: number;
+  id: number | null;
   incomingurl: string;
   mappedurl: string;
   isactive: boolean;
@@ -19,58 +21,43 @@ export default function UrlMappingManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [formData, setFormData] = useState<UrlMapping>({
-    id: 0,
+    id: null,
     incomingurl: "",
     mappedurl: "",
     isactive: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [filters, setFilters] = useState({
     incomingurl: "",
     mappedurl: "",
     isactive: -1,
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const urlMappingsPerPage = 8;
 
-  const token = localStorage.getItem("token");
+  // Use the search API hook
+  const { data: searchUrlMappings, refetch } = useSearchUrlMappingsQuery({
+    incomingurl: filters.incomingurl,
+    mappedurl: filters.mappedurl,
+    isactive: filters.isactive,
+  });
 
+  // Use the save API mutation hook
+  const [saveUrlMapping] = useSaveUrlMappingMutation();
+
+  // Update URL mappings when search results change
   useEffect(() => {
-    if (token) {
-      fetchUrlMappings();
+    if (searchUrlMappings) {
+      setUrlMappings(searchUrlMappings);
     }
-  }, [token]);
+  }, [searchUrlMappings]);
 
-  const fetchUrlMappings = async () => {
-    try {
-      const { incomingurl, mappedurl, isactive } = filters;
-      const response = await fetch(
-        `http://10.20.20.54:5259/api/urlmapping/Search?incomingurl=${incomingurl}&mappedurl=${mappedurl}&isactive=${isactive}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch URL mappings");
-
-      const data = await response.json();
-      console.log("URL Mappings Response:", data);
-
-      setUrlMappings(data); // Ensure the response is an array
-    } catch (error) {
-      console.error("Error fetching URL mappings:", error);
-    }
-  };
-
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        console.log("Saving URL Mapping with data:", formData);
-
         const payload = {
           id: formData.id || null,
           incomingurl: formData.incomingurl,
@@ -78,55 +65,30 @@ export default function UrlMappingManagement() {
           isactive: formData.isactive,
         };
 
-        console.log("Payload being sent to API:", payload);
+        // Call the save API
+        await saveUrlMapping(payload).unwrap();
 
-        const response = await fetch("http://10.20.20.54:5259/api/urlmapping/Save", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        });
+        // Update local state after saving
+        setUrlMappings((prev) => [...prev, payload]);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Error response from server:", errorText);
-          throw new Error(`Failed to save URL mapping: ${errorText}`);
-        }
-
-        const responseData = await response.json();
-        console.log("Save URL Mapping Response:", responseData);
-
-        if (formData.id) {
-          // Update the existing URL mapping in the state
-          setUrlMappings((prev) =>
-            prev.map((mapping) =>
-              mapping.id === formData.id ? { ...formData } : mapping
-            )
-          );
-        } else {
-          // Add the new URL mapping to the state
-          const newUrlMapping = { ...formData, id: responseData.id };
-          setUrlMappings((prev) => [...prev, newUrlMapping]);
-        }
-
+        // Reset form and close modal
         setIsFormOpen(false);
         setFormData({
-          id: 0,
+          id: null,
           incomingurl: "",
           mappedurl: "",
           isactive: true,
         });
 
-        // Fetch URL mappings again to ensure the list is up-to-date
-        fetchUrlMappings();
+        // Refetch URL mappings after saving
+        refetch();
       } catch (error) {
         console.error("Error saving URL mapping:", error);
       }
     }
   };
 
+  // Form validation
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.incomingurl) newErrors.incomingurl = "Incoming URL is required";
@@ -135,19 +97,30 @@ export default function UrlMappingManagement() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   };
 
-  const handlePageChange = (page: number) => setCurrentPage(page);
+  // Handle filter change
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    setCurrentPage(1);
+  };
 
+  // Filtered URL mappings based on search and filters
   const filteredUrlMappings = urlMappings.filter((mapping) => {
     const matchesSearch =
       mapping.incomingurl.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -157,6 +130,7 @@ export default function UrlMappingManagement() {
     return matchesSearch && matchesActive;
   });
 
+  // Pagination logic
   const totalPages = Math.ceil(filteredUrlMappings.length / urlMappingsPerPage);
   const currentUrlMappings = filteredUrlMappings.slice(
     (currentPage - 1) * urlMappingsPerPage,
@@ -272,7 +246,7 @@ export default function UrlMappingManagement() {
               <Button
                 onClick={() => {
                   setIsFilterOpen(false);
-                  fetchUrlMappings();
+                  refetch();
                 }}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg"
               >
@@ -296,13 +270,13 @@ export default function UrlMappingManagement() {
         {/* Pagination */}
         <div className="flex justify-center gap-2">
           <Button
-            onClick={() => handlePageChange(1)}
+            onClick={() => setCurrentPage(1)}
             disabled={currentPage === 1}
           >
             {"<<"}
           </Button>
           <Button
-            onClick={() => handlePageChange(currentPage - 1)}
+            onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
             {"<"}
@@ -311,13 +285,13 @@ export default function UrlMappingManagement() {
             Page {currentPage} of {totalPages}
           </span>
           <Button
-            onClick={() => handlePageChange(currentPage + 1)}
+            onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
             {">"}
           </Button>
           <Button
-            onClick={() => handlePageChange(totalPages)}
+            onClick={() => setCurrentPage(totalPages)}
             disabled={currentPage === totalPages}
           >
             {">>"}
@@ -393,29 +367,3 @@ export default function UrlMappingManagement() {
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

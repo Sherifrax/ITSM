@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 import { FaArrowRightArrowLeft } from "react-icons/fa6";
 import { GrSecure } from "react-icons/gr";
 import { ImBlocked } from "react-icons/im";
+import { RiGitPullRequestFill } from "react-icons/ri";
 
 // Assume these icons are imported from an icon library
 import {
@@ -38,9 +39,9 @@ const navItems: NavItem[] = [
     path: "/url-mapping"
   },
   {
-    icon: <UserCircleIcon />,
-    name: "User Log",
-    path: "/profile",
+    icon: <RiGitPullRequestFill />  ,
+    name: "Request Log",
+    path: "/requestlog",
   },
   {
     name: "API Security",
