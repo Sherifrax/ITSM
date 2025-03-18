@@ -1,9 +1,9 @@
 //import React from "react";
 import { Route } from "react-router-dom";
-import NotFound from "../pages/OtherPage/NotFound";
+import RequestLogManagement from "../pages/RequestLog/RequestLog";
 
 export const RequestLog = () => (
   <>
-    <Route path="/requestlog" element={<NotFound />} />
+    <Route path="/requestlog" element={<RequestLogManagement />} />
   </>
 );

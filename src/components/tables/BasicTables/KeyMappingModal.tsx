@@ -23,7 +23,8 @@ const KeyMappingModal: React.FC<KeyMappingModalProps> = ({ isOpen, onClose, urlM
   const localStorageKey = `selectedKeys_${urlMappingId}`;
 
   // Fetch API keys and initialize selectedKeys from local storage when the modal opens
-  const { data: fetchedApiKeys, isLoading } = useFetchApiKeysQuery({ urlmapping_id: urlMappingId });
+  const { data: fetchedApiKeys} = useFetchApiKeysQuery({ urlmapping_id: urlMappingId });
+  // const { data: fetchedApiKeys, isLoading } = useFetchApiKeysQuery({ urlmapping_id: urlMappingId });
 
   useEffect(() => {
     if (fetchedApiKeys) {
@@ -90,7 +91,7 @@ const KeyMappingModal: React.FC<KeyMappingModalProps> = ({ isOpen, onClose, urlM
                 onChange={() => handleCheckboxChange(apiKey.apikey)}
                 className="ml-2 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="ml-2 text-gray-700 dark:text-white/90">{apiKey.clientname}</span>
+              <span className="ml-2 text-gray-700 dark:text-white/90">{apiKey.apikey}</span>
             </div>
           ))}
         </div>
@@ -102,12 +103,10 @@ const KeyMappingModal: React.FC<KeyMappingModalProps> = ({ isOpen, onClose, urlM
             Cancel
           </Button> */}
           <Button
-            // className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 text-lg"
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 text-lg"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 text-lg"
             onClick={handleSave}
           >
-            Close
-            {/* save in here */}
+            Save
           </Button>
         </div>
       </div>
