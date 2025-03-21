@@ -4,6 +4,7 @@ import { FaArrowRightArrowLeft } from "react-icons/fa6";
 import { GrSecure } from "react-icons/gr";
 import { ImBlocked } from "react-icons/im";
 import { RiGitPullRequestFill } from "react-icons/ri";
+import { LuMailPlus } from "react-icons/lu";
 
 // Assume these icons are imported from an icon library
 import {
@@ -39,7 +40,8 @@ const navItems: NavItem[] = [
     path: "/url-mapping"
   },
   {
-    icon: <RiGitPullRequestFill />  ,
+    // icon: <RiGitPullRequestFill />  ,
+    icon: <LuMailPlus />,
     name: "Request Log",
     path: "/requestlog",
   },
@@ -51,7 +53,7 @@ const navItems: NavItem[] = [
   {
     name: "Blocked IP List",
     icon: <ImBlocked />,
-    path: "/blocked-ip"
+    path: "/blocked-ip-list"
   },
 ];
 

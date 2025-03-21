@@ -6,31 +6,32 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
-import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { FaSort, FaSortUp, FaSortDown, FaHistory } from "react-icons/fa";
 import Button from "../../ui/button";
 import { FcViewDetails } from "react-icons/fc";
+import { CgUnblock } from "react-icons/cg";
 
-interface RequestLog {
-  requestLogId: string;
-  url: string;
-  httpMethod: string;
-  requestUrl: string | null;
-  ipAddress: string;
-  browser: string;
-  machine: string;
-  country: string;
-  createdAt: string;
-  apiKey: string | null;
+interface IPRateLimit {
+  iPaddress: string;
+  requestCount: number;
+  lastRequestTime: string;
+  isblocked: boolean;
 }
 
-interface RequestLogTableProps {
-  requestLogs: RequestLog[];
-  onViewDetails: (requestLogId: string) => void;
+interface IPRateLimitTableProps {
+  ipRateLimits: IPRateLimit[];
+  onViewHistory: (ipAddress: string) => void;
+  onUnblock: (ipAddress: string, comment: string) => void;
 }
 
-export default function RequestLogTable({ requestLogs, onViewDetails }: RequestLogTableProps) {
+export default function IPRateLimitTable({
+  ipRateLimits,
+  onViewHistory,
+  onUnblock,
+}: IPRateLimitTableProps) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [comment, setComment] = useState<string>("");
 
   // Handle sorting
   const handleSort = (column: string) => {
@@ -42,12 +43,12 @@ export default function RequestLogTable({ requestLogs, onViewDetails }: RequestL
     }
   };
 
-  // Sort request logs
-  const sortedRequestLogs = [...requestLogs].sort((a, b) => {
+  // Sort IP rate limits
+  const sortedIPRateLimits = [...ipRateLimits].sort((a, b) => {
     if (!sortColumn) return 0;
 
-    const aValue = a[sortColumn as keyof RequestLog];
-    const bValue = b[sortColumn as keyof RequestLog];
+    const aValue = a[sortColumn as keyof IPRateLimit];
+    const bValue = b[sortColumn as keyof IPRateLimit];
 
     if (aValue === null) return sortDirection === "asc" ? -1 : 1;
     if (bValue === null) return sortDirection === "asc" ? 1 : -1;
@@ -77,41 +78,29 @@ export default function RequestLogTable({ requestLogs, onViewDetails }: RequestL
                 >
                   <div
                     className="flex items-center gap-1 cursor-pointer"
-                    onClick={() => handleSort("url")}
-                  >
-                    URL
-                    {getSortIcon("url")}
-                  </div>
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  <div
-                    className="flex items-center gap-1 cursor-pointer"
-                    onClick={() => handleSort("httpMethod")}
-                  >
-                    HTTP Method
-                    {getSortIcon("httpMethod")}
-                  </div>
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  <div
-                    className="flex items-center gap-1 cursor-pointer"
-                    onClick={() => handleSort("ipAddress")}
+                    onClick={() => handleSort("iPaddress")}
                   >
                     IP Address
-                    {getSortIcon("ipAddress")}
+                    {getSortIcon("iPaddress")}
                   </div>
                 </TableCell>
                 <TableCell
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Created At
+                  Request Count
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Last Request Time
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Status
                 </TableCell>
                 <TableCell
                   isHeader
@@ -123,33 +112,46 @@ export default function RequestLogTable({ requestLogs, onViewDetails }: RequestL
             </TableHeader>
 
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-              {sortedRequestLogs.map((log) => (
-                <TableRow key={log.requestLogId}>
+              {sortedIPRateLimits.map((limit) => (
+                <TableRow key={limit.iPaddress}>
                   <TableCell className="px-5 py-4 sm:px-6 text-start">
                     <div className="flex items-center gap-3">
                       <div>
                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {log.url}
+                          {limit.iPaddress}
                         </span>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {log.httpMethod}
+                    {limit.requestCount}
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {log.ipAddress}
+                    {new Date(limit.lastRequestTime).toLocaleString()}
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {new Date(log.createdAt).toLocaleString()}
+                    {limit.isblocked ? "Blocked" : "Unblocked"}
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    <Button
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
-                      onClick={() => onViewDetails(log.requestLogId)}
-                    >
-                      <FcViewDetails />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
+                        onClick={() => onViewHistory(limit.iPaddress)}
+                      >
+                        <FaHistory/>
+                      </Button>
+                      {limit.isblocked && <Button
+                        // className={`${
+                        //   limit.isblocked
+                        //     ? "bg-red-500 hover:bg-red-600"
+                        //     : "bg-gray-300 cursor-not-allowed"
+                        // } text-white px-3 py-1.5`}
+                        onClick={() => onUnblock(limit.iPaddress, comment)}
+                        disabled={!limit.isblocked}
+                      >
+                        <CgUnblock />
+                      </Button>}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

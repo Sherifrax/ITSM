@@ -14,6 +14,7 @@ import { store } from "./store/store";
 import { UserRoutes } from "./router/UserRoutes";
 import { UrlRoutes } from "./router/UrlRoutes";
 import { RequestLog } from "./router/RequestLog";
+import { BlockedIp } from "./router/BlockedIpList";
 
 
 // Function to check authentication
@@ -38,6 +39,7 @@ const App: React.FC = () => {
             {UserRoutes()}
             {UrlRoutes()}
             {RequestLog()}
+            {BlockedIp()}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
