@@ -1,29 +1,11 @@
-// import React from "react";
-// import { useGetDashboardDataQuery } from "../../services/grafanaApi";
-// import { Container, Spinner, Alert } from "react-bootstrap";
-
-// const Dashboard: React.FC = () => {
-//   const { data, error, isLoading } = useGetDashboardDataQuery(null);
-
-//   return (
-//     <Container>
-//       <h2 className="my-4">Dashboard</h2>
-//       {isLoading && <Spinner animation="border" />}
-//       {error && <Alert variant="danger">Error fetching dashboard</Alert>}
-//       {data && <iframe src="http://localhost:3000/d-solo/your-dashboard" width="100%" height="600px" />}
-//     </Container>
-//   );
-// };
-
-// export default Dashboard;
-
-import EcommerceMetrics from "../../components/dashboard/EcommerceMetrics";
-import MonthlySalesChart from "../../components/dashboard/MonthlySalesChart";
-import StatisticsChart from "../../components/dashboard/StatisticsChart";
-import MonthlyTarget from "../../components/dashboard/MonthlyTarget";
 import DemographicCard from "../../components/dashboard/DemographicCard";
 import PageMeta from "../../components/common/PageMeta";
 import RecentProjects from "../../components/dashboard/RecentProjects";
+import ApiHitsOverview from "../../components/dashboard/ApiHitsOverview";
+import MonthlyApiHit from "../../components/dashboard/MonthlyApiHit";
+import TotalApiHit from "../../components/dashboard/TotalApiHit";
+import TotalBlockedIp from "../../components/dashboard/TotalBlockedIp";
+import RequestTableData from "../../components/dashboard/RequestTableData";
 
 export default function Home() {
   return (
@@ -34,17 +16,19 @@ export default function Home() {
       />
       <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12 space-y-6 xl:col-span-7">
-          <EcommerceMetrics />
-
-          <MonthlySalesChart />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+            <TotalApiHit />
+            <TotalBlockedIp />
+          </div>
+          <ApiHitsOverview />
         </div>
 
         <div className="col-span-12 xl:col-span-5">
-          <MonthlyTarget />
+          <MonthlyApiHit />
         </div>
 
         <div className="col-span-12">
-          <StatisticsChart />
+          <RequestTableData />
         </div>
 
         <div className="col-span-12 xl:col-span-5">

@@ -1,7 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import React, { ReactNode  } from "react";
-
-// import SignIn from "./pages/AuthPages/SignIn";
 import NotFound from "./pages/OtherPage/NotFound";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
@@ -19,12 +17,12 @@ import { BlockedIp } from "./router/BlockedIpList";
 
 // Function to check authentication
 const isAuthenticated = () => {
-  return !!localStorage.getItem("token"); // Check if a token exists
+  return localStorage.getItem("token"); // Check if a token exists
 };
 
 // Private Route Wrapper
 const PrivateRoute = ({ children }: { children: ReactNode }) => {
-    return isAuthenticated() ? children : <Navigate to="/login" replace />;
+    return isAuthenticated() ? children : <Navigate to="/" replace />;
 };
 
 const App: React.FC = () => {
