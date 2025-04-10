@@ -11,21 +11,14 @@ interface ConnectKeyMappingRequest {
 export const keyMappingConnect = apiService.injectEndpoints({
   endpoints: (builder) => ({
     saveKeyMapping: builder.mutation<void, ConnectKeyMappingRequest>({
-      query: (requestData) => {
-        // Construct the URL with query parameters
-        const url = `${KeyMappingUrls.Connect}?apikeyList=${JSON.stringify(
-          requestData.apikeyList
-        )}&urlmapping_id=${requestData.urlmapping_id}`;
-
-        return {
-          url,
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            accept: "*/*", // Add this header if required by the API
-          },
-        };
-      },
+      query: (requestData) => ({
+        url: KeyMappingUrls.Connect,
+        method: "POST",
+        body: requestData, // Send as request body instead of query params
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
     }),
   }),
 });

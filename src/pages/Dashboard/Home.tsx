@@ -1,6 +1,4 @@
-import DemographicCard from "../../components/dashboard/DemographicCard";
 import PageMeta from "../../components/common/PageMeta";
-import RecentProjects from "../../components/dashboard/RecentProjects";
 import ApiHitsOverview from "../../components/dashboard/ApiHitsOverview";
 import MonthlyApiHit from "../../components/dashboard/MonthlyApiHit";
 import TotalApiHit from "../../components/dashboard/TotalApiHit";
@@ -29,14 +27,6 @@ export default function Home() {
 
         <div className="col-span-12">
           <RequestTableData />
-        </div>
-
-        <div className="col-span-12 xl:col-span-5">
-          <DemographicCard />
-        </div>
-
-        <div className="col-span-12 xl:col-span-7">
-          <RecentProjects />
         </div>
       </div>
     </>

@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
-import BasicTableOne from "../../components/tables/BasicTables/userManagementTable";
+import BasicTableOne from "../../components/tables/BasicTables/ApiManagementTable";
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button";
 import PageMeta from "../../components/common/PageMeta";
-
-// Import from the API service
 import { useSearchApiKeysQuery } from "../../services/ApiKey/search";
 import { useSaveApiKeyMutation } from "../../services/ApiKey/save";
 
-// Interfaces for API Key
 interface ApiKey {
   apiKey: string | null;
   clientName: string;
@@ -23,9 +20,9 @@ interface ApiKey {
 export default function ApiKeyManagement() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false); // State for filter visibility
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [formData, setFormData] = useState<ApiKey>({
-    apiKey: "",
+    apiKey: null,
     clientName: "",
     isActive: false,
     isIpCheck: false,
@@ -43,7 +40,6 @@ export default function ApiKeyManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const apiKeysPerPage = 8;
 
-  // Use the search API hook
   const { data: searchApiKeys, refetch } = useSearchApiKeysQuery({
     clientName: searchQuery,
     isActive: filters.isActive ? 1 : -1,
@@ -52,7 +48,6 @@ export default function ApiKeyManagement() {
     isRegionCheck: filters.isRegionCheck ? 1 : -1,
   });
 
-  // Use the save API mutation hook
   const [saveApiKey] = useSaveApiKeyMutation();
 
   useEffect(() => {
@@ -61,14 +56,12 @@ export default function ApiKeyManagement() {
     }
   }, [searchApiKeys]);
 
-  // Handle form submit for saving API keys
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        // Construct the payload, ensuring apiKey is null if not provided
         const payload = {
-          apiKey: formData.apiKey || null, // Set to null if formData.apiKey is not provided
+          apiKey: formData.apiKey || null,
           clientName: formData.clientName,
           isActive: formData.isActive,
           isIpCheck: formData.isIpCheck,
@@ -76,26 +69,16 @@ export default function ApiKeyManagement() {
           isRegionCheck: formData.isRegionCheck,
         };
 
-        console.log("Payload:", payload); // Debugging: Log the payload
-
-        // Call the save API
         await saveApiKey(payload).unwrap();
-
-        // Update local state after saving
-        setApiKeys((prev) => [...prev, payload]);
-
-        // Reset form and close modal
         setIsFormOpen(false);
         setFormData({
-          apiKey: null, // Reset apiKey to null
+          apiKey: null,
           clientName: "",
           isActive: false,
           isIpCheck: false,
           isCountryCheck: false,
           isRegionCheck: false,
         });
-
-        // Refetch the API keys after saving
         refetch();
       } catch (error) {
         console.error("Error saving API key:", error);
@@ -103,7 +86,6 @@ export default function ApiKeyManagement() {
     }
   };
 
-  // Form validation
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.clientName) newErrors.clientName = "Client Name is required";
@@ -111,27 +93,23 @@ export default function ApiKeyManagement() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form data change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
   };
 
-  // Handle filter change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFilters((prev) => ({ ...prev, [name]: checked }));
-    setCurrentPage(1); // Reset to first page on new filter
+    setCurrentPage(1);
   };
 
-  // Filtered API Keys based on search query and filters
   const filteredApiKeys = apiKeys.filter((key) => {
     const matchesSearch = key.clientName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesActive = !filters.isActive || key.isActive;
@@ -142,7 +120,6 @@ export default function ApiKeyManagement() {
     return matchesSearch && matchesActive && matchesIpCheck && matchesCountryCheck && matchesRegionCheck;
   });
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredApiKeys.length / apiKeysPerPage);
   const currentApiKeys = filteredApiKeys.slice(
     (currentPage - 1) * apiKeysPerPage,
@@ -154,11 +131,10 @@ export default function ApiKeyManagement() {
       <PageMeta title="Api Key Management" description="" />
       <PageBreadcrumb pageTitle="API Key Management" />
       <div className="space-y-4 relative">
-        {/* Enhanced Search and Filter Section */}
+        {/* Search and Filter Section */}
         <div className="flex gap-4 items-center w-full">
           <div className="relative flex-1">
             <div className="flex rounded-lg shadow-sm hover:shadow-md transition-shadow w-full">
-              {/* Search Icon on the Left */}
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
@@ -168,7 +144,6 @@ export default function ApiKeyManagement() {
                   />
                 </svg>
               </span>
-              {/* Search Input */}
               <input
                 type="text"
                 placeholder="Search clients..."
@@ -178,13 +153,12 @@ export default function ApiKeyManagement() {
               />
             </div>
           </div>
-          {/* Filter Button */}
           <Button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className="px-6 py-3 border rounded-lg bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-700 transition-colors"
           >
             <svg
-              className="w-6 h-6 text-gray-700 linearGradient(to right bottom, rgb(42, 142, 229), rgb(20, 13, 206)))"
+              className="w-6 h-6 text-gray-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -197,8 +171,6 @@ export default function ApiKeyManagement() {
               />
             </svg>
           </Button>
-
-          {/* Add New Button */}
           <Button
             onClick={() => setIsFormOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors text-lg"
@@ -207,7 +179,7 @@ export default function ApiKeyManagement() {
           </Button>
         </div>
 
-        {/* Enhanced Filter Panel */}
+        {/* Filter Panel */}
         <div
           className={`fixed top-0 right-0 h-full w-96 bg-white shadow-xl transition-transform duration-300 ease-in-out ${
             isFilterOpen ? "translate-x-0" : "translate-x-full"
@@ -318,7 +290,22 @@ export default function ApiKeyManagement() {
       </div>
 
       {/* Add/Edit API Key Modal */}
-      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} className="max-w-md">
+      <Modal 
+        isOpen={isFormOpen} 
+        onClose={() => {
+          setIsFormOpen(false);
+          setFormData({
+            apiKey: null,
+            clientName: "",
+            isActive: false,
+            isIpCheck: false,
+            isCountryCheck: false,
+            isRegionCheck: false,
+          });
+          setErrors({});
+        }} 
+        className="max-w-md"
+      >
         <form onSubmit={handleSubmit} className="p-6">
           <h2 className="text-xl font-semibold mb-6 dark:text-white/90">
             {formData.apiKey ? "Edit API Key" : "Add New API Key"}
@@ -340,56 +327,58 @@ export default function ApiKeyManagement() {
             )}
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Active</label>
-            <input
-              type="checkbox"
-              name="isActive"
-              checked={formData.isActive}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, isActive: e.target.checked }))
-              }
-              className="w-5 h-5"
-            />
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-400">Active</label>
+              <input
+                type="checkbox"
+                name="isActive"
+                checked={formData.isActive}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, isActive: e.target.checked }))
+                }
+                className="w-5 h-5"
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">IP Check</label>
-            <input
-              type="checkbox"
-              name="isIpCheck"
-              checked={formData.isIpCheck}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, isIpCheck: e.target.checked }))
-              }
-              className="w-5 h-5"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-400">IP Check</label>
+              <input
+                type="checkbox"
+                name="isIpCheck"
+                checked={formData.isIpCheck}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, isIpCheck: e.target.checked }))
+                }
+                className="w-5 h-5"
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Country Check</label>
-            <input
-              type="checkbox"
-              name="isCountryCheck"
-              checked={formData.isCountryCheck}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, isCountryCheck: e.target.checked }))
-              }
-              className="w-5 h-5"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-400">Country Check</label>
+              <input
+                type="checkbox"
+                name="isCountryCheck"
+                checked={formData.isCountryCheck}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, isCountryCheck: e.target.checked }))
+                }
+                className="w-5 h-5"
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-400">Region Check</label>
-            <input
-              type="checkbox"
-              name="isRegionCheck"
-              checked={formData.isRegionCheck}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, isRegionCheck: e.target.checked }))
-              }
-              className="w-5 h-5"
-            />
+            <div>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-400">Region Check</label>
+              <input
+                type="checkbox"
+                name="isRegionCheck"
+                checked={formData.isRegionCheck}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, isRegionCheck: e.target.checked }))
+                }
+                className="w-5 h-5"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end space-x-4">

@@ -63,6 +63,7 @@ export default function UrlMappingTable({
   const handleLinkClick = (urlMappingId: number) => {
     setSelectedUrlMappingId(urlMappingId);
     setIsKeyMappingModalOpen(true);
+    console.log(urlMappingId)
   };
 
   return (
@@ -160,6 +161,7 @@ export default function UrlMappingTable({
 
       {/* Key Mapping Modal */}
       <KeyMappingModal
+        key={selectedUrlMappingId} // Force re-render when selectedUrlMappingId changes
         isOpen={isKeyMappingModalOpen}
         onClose={() => setIsKeyMappingModalOpen(false)}
         urlMappingId={selectedUrlMappingId || 0}

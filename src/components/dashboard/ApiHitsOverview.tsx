@@ -1,11 +1,40 @@
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { MoreDotIcon } from "../../icons";
-import { useState } from "react";
+import { useGetDailyHitQuery } from "../../services/Dashboard/dashboard.service";
+import { format, parse } from "date-fns";
 
 export default function ApiHitsOverview() {
+  const { data: dailyHits } = useGetDailyHitQuery();
+  
+  // Process the data to match the chart format
+  const processChartData = () => {
+    if (!dailyHits || dailyHits.length === 0) {
+      return {
+        categories: [],
+        seriesData: []
+      };
+    }
+
+    // Take the last 15 days (API returns newest first) and reverse to show chronological order
+    const last15Days = dailyHits.slice(0, 15).reverse();
+    
+    // Format labels to show "Day\nDate" (e.g., "Mon\nMar 20")
+    const categories = last15Days.map(item => {
+      const date = parse(item.requestDate, "dd/MM/yyyy", new Date());
+      return `${format(date, "EEE")}\n${format(date, "MMM d")}`;
+    });
+    
+    // Extract hit counts
+    const seriesData = last15Days.map(item => item.hitCount);
+
+    return {
+      categories,
+      seriesData
+    };
+  };
+
+  const { categories, seriesData } = processChartData();
+
   const options: ApexOptions = {
     colors: ["#465fff"],
     chart: {
@@ -33,29 +62,24 @@ export default function ApiHitsOverview() {
       colors: ["transparent"],
     },
     xaxis: {
-      categories: [
-        "Sun",
-        "Mon",
-        "Tue",
-        "Wed",
-        "Thu",
-        "Fri",
-        "Sat",
-        "Sun",
-        "Mon",
-        "Tue",
-        "Wed",
-        "Thu",
-        "Fri",
-        "Sat",
-        "Sun",
-      ],
+      categories: categories,
       axisBorder: {
         show: false,
       },
       axisTicks: {
         show: false,
       },
+      labels: {
+        style: {
+          fontSize: '10px',
+          fontFamily: 'Outfit, sans-serif',
+        },
+        formatter: function(value) {
+          // Split the value into day and date parts
+          const [day, date] = value.split('\n');
+          return `${date}`;
+        }
+      }
     },
     legend: {
       show: true,
@@ -78,65 +102,45 @@ export default function ApiHitsOverview() {
     fill: {
       opacity: 1,
     },
-
     tooltip: {
       x: {
         show: false,
       },
       y: {
-        formatter: (val: number) => `${val}`,
+        formatter: (val: number) => `${val} hits`,
       },
     },
   };
+
   const series = [
     {
-      name: "Sales",
-      data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112, 50, 60, 70],
+      name: "API Hits",
+      data: seriesData,
     },
   ];
-  const [isOpen, setIsOpen] = useState(false);
-
-  function toggleDropdown() {
-    setIsOpen(!isOpen);
-  }
-
-  function closeDropdown() {
-    setIsOpen(false);
-  }
+  
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
           API Hits Overview (Last 15 Days)
         </h3>
-        <div className="relative inline-block">
-          <button className="dropdown-toggle" onClick={toggleDropdown}>
-            <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
-          </button>
-          <Dropdown
-            isOpen={isOpen}
-            onClose={closeDropdown}
-            className="w-40 p-2"
-          >
-            <DropdownItem
-              onItemClick={closeDropdown}
-              className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              View More
-            </DropdownItem>
-            <DropdownItem
-              onItemClick={closeDropdown}
-              className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              Delete
-            </DropdownItem>
-          </Dropdown>
-        </div>
       </div>
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
         <div className="-ml-5 min-w-[650px] xl:min-w-full pl-2">
-          <Chart options={options} series={series} type="bar" height={180} />
+          {dailyHits ? (
+            <Chart 
+              options={options} 
+              series={series} 
+              type="bar" 
+              height={180} 
+            />
+          ) : (
+            <div className="h-[180px] flex items-center justify-center">
+              Loading data...
+            </div>
+          )}
         </div>
       </div>
     </div>

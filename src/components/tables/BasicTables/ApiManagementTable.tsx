@@ -23,6 +23,7 @@ export default function userManagementTable({
 }: {
   apiKeys: ApiKey[];
   onEdit: (apiKey: ApiKey) => void;
+  
 }) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -73,6 +74,18 @@ export default function userManagementTable({
                   >
                     Client Name
                     {getSortIcon("clientName")}
+                  </div>
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  <div
+                    className="flex items-center gap-1 cursor-pointer"
+                    onClick={() => handleSort("apiKey")}
+                  >
+                    Api Key
+                    {getSortIcon("apiKey")}
                   </div>
                 </TableCell>
                 <TableCell
@@ -140,6 +153,15 @@ export default function userManagementTable({
                       <div>
                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
                           {apiKey.clientName}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-5 py-4 sm:px-6 text-start">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                          {apiKey.apiKey}
                         </span>
                       </div>
                     </div>

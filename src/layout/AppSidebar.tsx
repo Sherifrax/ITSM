@@ -28,9 +28,9 @@ const navItems: NavItem[] = [
     path: "/home",
   },
   {
-    name: "User Management",
+    name: "API Management",
     icon: <TableIcon />,
-    path: "/manage-users"
+    path: "/manage-api",
   },
   {
     name: "Middleware Mapping",
@@ -46,7 +46,7 @@ const navItems: NavItem[] = [
   {
     name: "API Security",
     icon: <GrSecure />,
-    path: "/manage-api"
+    path: "/api-security"
   },
   {
     name: "Blocked IP List",

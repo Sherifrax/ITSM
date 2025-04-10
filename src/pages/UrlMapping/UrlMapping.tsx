@@ -73,6 +73,7 @@ export default function UrlMappingManagement() {
 
         // Reset form and close modal
         setIsFormOpen(false);
+        
         setFormData({
           id: null,
           incomingurl: "",
@@ -300,7 +301,20 @@ export default function UrlMappingManagement() {
       </div>
 
       {/* Add/Edit URL Mapping Modal */}
-      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} className="max-w-md">
+      <Modal 
+        isOpen={isFormOpen} 
+        onClose={() => {
+          setIsFormOpen(false);
+          setFormData({
+            id: null,
+            incomingurl: "",
+            mappedurl: "",
+            isactive: true,
+          });
+          setErrors({});
+        }} 
+        className="max-w-md"
+      >
         <form onSubmit={handleSubmit} className="p-6">
           <h2 className="text-xl font-semibold mb-6 dark:text-white/90">
             {formData.id ? "Edit URL Mapping" : "Add New URL Mapping"}
