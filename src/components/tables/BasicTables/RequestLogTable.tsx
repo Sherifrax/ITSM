@@ -21,6 +21,8 @@ interface RequestLog {
   country: string;
   createdAt: string;
   apiKey: string | null;
+  clientName: string;
+  responseStatusCode: number;
 }
 
 interface RequestLogTableProps {
@@ -71,6 +73,24 @@ export default function RequestLogTable({ requestLogs, onViewDetails }: RequestL
           <Table>
             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
               <TableRow>
+
+
+
+              <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  <div
+                    className="flex items-center gap-1 cursor-pointer"
+                    onClick={() => handleSort("requestLogId")}
+                  >
+                    Request Log Id
+                    {getSortIcon("clientName")}
+                  </div>
+                </TableCell>
+
+
+
                 <TableCell
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -83,6 +103,35 @@ export default function RequestLogTable({ requestLogs, onViewDetails }: RequestL
                     {getSortIcon("url")}
                   </div>
                 </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  <div
+                    className="flex items-center gap-1 cursor-pointer"
+                    onClick={() => handleSort("clientName")}
+                  >
+                    Client Name
+                    {getSortIcon("clientName")}
+                  </div>
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  <div
+                    className="flex items-center gap-1 cursor-pointer"
+                    onClick={() => handleSort("responseStatusCode")}
+                  >
+                    Response Status Code
+                    {getSortIcon("responseStatusCode")}
+                  </div>
+                </TableCell>
+
+
+
                 <TableCell
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -125,6 +174,12 @@ export default function RequestLogTable({ requestLogs, onViewDetails }: RequestL
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {sortedRequestLogs.map((log) => (
                 <TableRow key={log.requestLogId}>
+
+
+                  <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    {log.requestLogId}
+                  </TableCell>
+
                   <TableCell className="px-5 py-4 sm:px-6 text-start">
                     <div className="flex items-center gap-3">
                       <div>
@@ -134,6 +189,16 @@ export default function RequestLogTable({ requestLogs, onViewDetails }: RequestL
                       </div>
                     </div>
                   </TableCell>
+
+                  <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    {log.clientName}
+                  </TableCell>
+
+                  <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    {log.responseStatusCode}
+                  </TableCell>
+
+
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     {log.httpMethod}
                   </TableCell>
@@ -144,12 +209,14 @@ export default function RequestLogTable({ requestLogs, onViewDetails }: RequestL
                     {new Date(log.createdAt).toLocaleString()}
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    <Button
+                  <div title="View Details">
+                    <Button 
                       className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
                       onClick={() => onViewDetails(log.requestLogId)}
                     >
                       <FcViewDetails />
                     </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

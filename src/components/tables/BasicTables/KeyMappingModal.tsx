@@ -192,7 +192,7 @@ const KeyMappingModal: React.FC<KeyMappingModalProps> = ({ isOpen, onClose, urlM
                 </>
               ) : (
                 <>
-                  <FiSave className="mr-2" />
+              
                   Save
                 </>
               )}
