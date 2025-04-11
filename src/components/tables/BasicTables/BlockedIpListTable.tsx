@@ -146,11 +146,11 @@ export default function IPRateLimitTable({
                       
                       <div title="Unblock IP">
                       <Button
-                        // className={`${
-                        //   limit.isblocked
-                        //     ? "bg-red-500 hover:bg-red-600"
-                        //     : "bg-gray-300 cursor-not-allowed"
-                        // } text-white px-3 py-1.5`}
+                        className={`${
+                          limit.isblocked
+                            ? "bg-red-500 hover:bg-red-600"
+                            : "bg-gray-300 cursor-not-allowed"
+                        } text-white px-3 py-1.5`}
                         onClick={() => onUnblock(limit.iPaddress, comment)}
                         disabled={!limit.isblocked}
                       >
