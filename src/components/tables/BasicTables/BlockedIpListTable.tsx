@@ -134,13 +134,18 @@ export default function IPRateLimitTable({
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     <div className="flex gap-2">
+                    <div title="View Details">
                       <Button
                         className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
                         onClick={() => onViewHistory(limit.iPaddress)}
                       >
                         <FaHistory/>
                       </Button>
-                      {limit.isblocked && <Button
+                      </div>
+                      {limit.isblocked && 
+                      
+                      <div title="Unblock IP">
+                      <Button
                         // className={`${
                         //   limit.isblocked
                         //     ? "bg-red-500 hover:bg-red-600"
@@ -150,7 +155,8 @@ export default function IPRateLimitTable({
                         disabled={!limit.isblocked}
                       >
                         <CgUnblock />
-                      </Button>}
+                      </Button>
+                      </div>}
                     </div>
                   </TableCell>
                 </TableRow>

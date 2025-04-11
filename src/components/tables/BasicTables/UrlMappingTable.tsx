@@ -143,18 +143,21 @@ export default function UrlMappingTable({
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <div className="flex gap-2">
+                    <div title="Edit Details">
                       <Button
                         className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
                         onClick={() => onEdit(mapping)}
                       >
                         <FaRegEdit />
-                      </Button>
+                      </Button></div>
+
+                      <div title="Connect">
                       <Button
                         className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1.5"
                         onClick={() => mapping.id !== null && handleLinkClick(mapping.id)}
                       >
                         <HiOutlineLink />
-                      </Button>
+                      </Button></div>
                     </div>
                   </TableCell>
                 </TableRow>
