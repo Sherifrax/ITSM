@@ -16,10 +16,12 @@ import { UrlMapping } from "../../../types/UrlMapping"; // Import the UrlMapping
 interface UrlMappingTableProps {
   urlMappings: UrlMapping[];
   onEdit: (mapping: UrlMapping) => void;
+  highlightedItem?: number | null;
 }
 export default function UrlMappingTable({
   urlMappings,
   onEdit,
+  highlightedItem,
 }: UrlMappingTableProps) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -120,7 +122,10 @@ export default function UrlMappingTable({
 
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {sortedUrlMappings.map((mapping, index) => (
-                <TableRow key={`${mapping.id}-${index}`}>
+                <TableRow 
+                  key={`${mapping.id}-${index}`}
+                  className={highlightedItem === mapping.id ? "bg-blue-50 dark:bg-blue-900/30" : ""}
+                >
                   <TableCell className="px-5 py-4 sm:px-6 text-start">
                     <div className="flex items-center gap-3">
                       <div>

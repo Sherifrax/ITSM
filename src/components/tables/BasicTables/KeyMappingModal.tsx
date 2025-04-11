@@ -90,7 +90,7 @@ const KeyMappingModal: React.FC<KeyMappingModalProps> = ({ isOpen, onClose, urlM
       await saveKeyMapping(payload).unwrap();
       localStorage.setItem(localStorageKey, JSON.stringify(selectedKeys));
       setSaveStatus("success");
-      setTimeout(() => onClose(), 1000); // Close after success
+      setTimeout(() => onClose(), 3000); // Close after success
     } catch (error) {
       console.error("Error saving key mapping:", error);
       setSaveStatus("error");

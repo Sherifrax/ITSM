@@ -7,6 +7,7 @@ import Button from "../../components/ui/button";
 import PageMeta from "../../components/common/PageMeta";
 import { useSearchApiKeysQuery } from "../../services/ApiKey/search";
 import { useSaveApiKeyMutation } from "../../services/ApiKey/save";
+import { FiCheck, FiLoader } from "react-icons/fi";
 
 interface ApiKey {
   apiKey: string | null;
@@ -39,6 +40,7 @@ export default function ApiKeyManagement() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const apiKeysPerPage = 8;
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
 
   const { data: searchApiKeys, refetch } = useSearchApiKeysQuery({
     clientName: searchQuery,
@@ -60,6 +62,7 @@ export default function ApiKeyManagement() {
     e.preventDefault();
     if (validateForm()) {
       try {
+        setSaveStatus("saving");
         const payload = {
           apiKey: formData.apiKey || null,
           clientName: formData.clientName,
@@ -70,18 +73,23 @@ export default function ApiKeyManagement() {
         };
 
         await saveApiKey(payload).unwrap();
-        setIsFormOpen(false);
-        setFormData({
-          apiKey: null,
-          clientName: "",
-          isActive: false,
-          isIpCheck: false,
-          isCountryCheck: false,
-          isRegionCheck: false,
-        });
-        refetch();
+        setSaveStatus("success");
+        setTimeout(() => {
+          setIsFormOpen(false);
+          setFormData({
+            apiKey: null,
+            clientName: "",
+            isActive: false,
+            isIpCheck: false,
+            isCountryCheck: false,
+            isRegionCheck: false,
+          });
+          refetch();
+          setSaveStatus("idle");
+        }, 3000);
       } catch (error) {
         console.error("Error saving API key:", error);
+        setSaveStatus("error");
       }
     }
   };
@@ -303,6 +311,7 @@ export default function ApiKeyManagement() {
             isRegionCheck: false,
           });
           setErrors({});
+          setSaveStatus("idle");
         }} 
         className="max-w-md"
       >
@@ -381,15 +390,44 @@ export default function ApiKeyManagement() {
             </div>
           </div>
 
+          {/* Status message */}
+          <div className="mb-4">
+            {saveStatus === "success" && (
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+                <FiCheck className="h-4 w-4" />
+                <span>API Key saved successfully!</span>
+              </div>
+            )}
+            {saveStatus === "error" && (
+              <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>Error saving API Key. Please try again.</span>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end space-x-4">
             <Button
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 mr-4 px-6 py-3 text-lg"
               onClick={() => setIsFormOpen(false)}
+              disabled={saveStatus === "saving"}
             >
               Cancel
             </Button>
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 text-lg">
-              Save
+            <Button 
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 text-lg min-w-24"
+              disabled={saveStatus === "saving"}
+            >
+              {saveStatus === "saving" ? (
+                <>
+                  <FiLoader className="animate-spin mr-2 inline" />
+                  Saving...
+                </>
+              ) : (
+                "Save"
+              )}
             </Button>
           </div>
         </form>

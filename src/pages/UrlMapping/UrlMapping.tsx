@@ -7,6 +7,7 @@ import Button from "../../components/ui/button";
 import PageMeta from "../../components/common/PageMeta";
 import { useSaveUrlMappingMutation } from "../../services/UrlMapping/save";
 import { useSearchUrlMappingsQuery } from "../../services/UrlMapping/search";
+import { FiCheck, FiLoader } from "react-icons/fi";
 
 // Interfaces for URL Mapping
 interface UrlMapping {
@@ -27,6 +28,7 @@ export default function UrlMappingManagement() {
     isactive: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [highlightedItem, setHighlightedItem] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filters, setFilters] = useState({
     incomingurl: "",
@@ -35,6 +37,7 @@ export default function UrlMappingManagement() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const urlMappingsPerPage = 8;
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
 
   // Use the search API hook
   const { data: searchUrlMappings, refetch } = useSearchUrlMappingsQuery({
@@ -58,33 +61,41 @@ export default function UrlMappingManagement() {
     e.preventDefault();
     if (validateForm()) {
       try {
+        setSaveStatus("saving");
         const payload = {
           id: formData.id || null,
           incomingurl: formData.incomingurl,
           mappedurl: formData.mappedurl,
-          isactive: formData.isactive,
+          isactive: formData.isactive
         };
 
         // Call the save API
         await saveUrlMapping(payload).unwrap();
 
-        // Update local state after saving
-        setUrlMappings((prev) => [...prev, payload]);
+        // Set success status
+        setSaveStatus("success");
 
-        // Reset form and close modal
-        setIsFormOpen(false);
-        
-        setFormData({
-          id: null,
-          incomingurl: "",
-          mappedurl: "",
-          isactive: true,
-        });
+        // Highlight the new/edited item
+        if (payload.id) {
+          setHighlightedItem(payload.id);
+          setTimeout(() => setHighlightedItem(null), 2000);
+        }
 
-        // Refetch URL mappings after saving
-        refetch();
+        // Reset form and close modal after delay
+        setTimeout(() => {
+          setIsFormOpen(false);
+          setFormData({
+            id: null,
+            incomingurl: "",
+            mappedurl: "",
+            isactive: true,
+          });
+          refetch();
+          setSaveStatus("idle");
+        }, 3000);
       } catch (error) {
         console.error("Error saving URL mapping:", error);
+        setSaveStatus("error");
       }
     }
   };
@@ -142,6 +153,7 @@ export default function UrlMappingManagement() {
     <>
       <PageMeta title="URL Mapping Management" description="" />
       <PageBreadcrumb pageTitle="URL Mapping Management" />
+      
       <div className="space-y-4 relative">
         {/* Search and Filter Section */}
         <div className="flex gap-4 items-center w-full">
@@ -265,6 +277,7 @@ export default function UrlMappingManagement() {
               setFormData(mapping);
               setIsFormOpen(true);
             }}
+            highlightedItem={highlightedItem}
           />
         </ComponentCard>
 
@@ -312,6 +325,7 @@ export default function UrlMappingManagement() {
             isactive: true,
           });
           setErrors({});
+          setSaveStatus("idle");
         }} 
         className="max-w-md"
       >
@@ -365,15 +379,44 @@ export default function UrlMappingManagement() {
             />
           </div>
 
+          {/* Status message */}
+          <div className="mb-4">
+            {saveStatus === "success" && (
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+                <FiCheck className="h-4 w-4" />
+                <span>URL Mapping saved successfully!</span>
+              </div>
+            )}
+            {saveStatus === "error" && (
+              <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>Error saving URL Mapping. Please try again.</span>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end space-x-4">
             <Button
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 mr-4 px-6 py-3 text-lg"
               onClick={() => setIsFormOpen(false)}
+              disabled={saveStatus === "saving"}
             >
               Cancel
             </Button>
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 text-lg">
-              Save
+            <Button 
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 text-lg min-w-24"
+              disabled={saveStatus === "saving"}
+            >
+              {saveStatus === "saving" ? (
+                <>
+                  <FiLoader className="animate-spin mr-2 inline" />
+                  Saving...
+                </>
+              ) : (
+                "Save"
+              )}
             </Button>
           </div>
         </form>
