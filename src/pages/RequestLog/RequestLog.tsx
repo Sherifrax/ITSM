@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import RequestLogTable from "../../components/tables/BasicTables/RequestLogTable";
@@ -7,6 +7,7 @@ import Button from "../../components/ui/button";
 import PageMeta from "../../components/common/PageMeta";
 import { useSearchRequestLogsQuery } from "../../services/RequestLog/search";
 import { useGetRequestLogDetailsQuery } from "../../services/RequestLog/details";
+import { FiLoader } from "react-icons/fi";
 
 export default function RequestLogManagement() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -25,12 +26,28 @@ export default function RequestLogManagement() {
   // State for handling details modal
   const [selectedRequestLogId, setSelectedRequestLogId] = useState<string | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [currentDetails, setCurrentDetails] = useState<any>(null);
 
   // Fetch request log details
   const { data: requestLogDetails, isLoading: isDetailsLoading } = useGetRequestLogDetailsQuery(
     { requestlogid: selectedRequestLogId! },
     { skip: !selectedRequestLogId }
   );
+
+  // Update current details when new data is fetched
+  useEffect(() => {
+    if (requestLogDetails) {
+      setCurrentDetails(requestLogDetails);
+    }
+  }, [requestLogDetails]);
+
+  // Handle view details
+  const handleViewDetails = (requestLogId: string) => {
+    setSelectedRequestLogId(requestLogId);
+    setIsDetailsModalOpen(true);
+    // Clear current details while loading new ones
+    setCurrentDetails(null);
+  };
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,12 +62,6 @@ export default function RequestLogManagement() {
     setCurrentPage(1);
   };
 
-  // Handle view details
-  const handleViewDetails = (requestLogId: string) => {
-    setSelectedRequestLogId(requestLogId);
-    setIsDetailsModalOpen(true);
-  };
-
   // Filtered request logs based on search and filters
   const filteredRequestLogs = requestLogs.filter((log) => {
     const matchesSearch =
@@ -61,9 +72,26 @@ export default function RequestLogManagement() {
     return matchesSearch;
   });
 
+  // Map the filteredRequestLogs to match the RequestLogTable's RequestLog interface
+  const mappedRequestLogs = filteredRequestLogs.map((log) => ({
+    requestLogId: log.requestLogId,
+    url: log.url,
+    httpMethod: log.httpMethod,
+    requestUrl: log.requestUrl,
+    ipAddress: log.ipAddress,
+    browser: log.browser,
+    machine: log.machine,
+    country: log.country,
+    createdAt: log.createdAt,
+    apiKey: log.apiKey,
+    // Add default or derived values for missing properties
+    clientName: "Unknown Client", // Default value, adjust as needed
+    responseStatusCode: 0, // Default value, adjust as needed
+  }));
+
   // Pagination logic
-  const totalPages = Math.ceil(filteredRequestLogs.length / requestLogsPerPage);
-  const currentRequestLogs = filteredRequestLogs.slice(
+  const totalPages = Math.ceil(mappedRequestLogs.length / requestLogsPerPage);
+  const currentRequestLogs = mappedRequestLogs.slice(
     (currentPage - 1) * requestLogsPerPage,
     currentPage * requestLogsPerPage
   );
@@ -193,10 +221,10 @@ export default function RequestLogManagement() {
 
         {/* Table and Pagination */}
         <ComponentCard title="Manage Request Logs">
-          <RequestLogTable
-            requestLogs={currentRequestLogs}
-            onViewDetails={handleViewDetails}
-          />
+        <RequestLogTable
+          requestLogs={currentRequestLogs}
+          onViewDetails={handleViewDetails}
+        />
         </ComponentCard>
 
         {/* Pagination */}
@@ -233,96 +261,98 @@ export default function RequestLogManagement() {
 
       {/* Details Modal */}
       <Modal
-  isOpen={isDetailsModalOpen}
-  onClose={() => setIsDetailsModalOpen(false)}
-  className="max-w-2xl"
->
-  <div className="p-8 bg-white dark:bg-gray-800 rounded-lg">
-    <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white/90">
-      Request Log Details
-    </h2>
-    {isDetailsLoading ? (
-      <p className="text-gray-600 dark:text-gray-400">Loading details...</p>
-    ) : requestLogDetails ? (
-      <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4">
-        <div className="grid grid-cols-1 gap-6">
- 
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Request Log ID
-            </label>
-            <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
-              {requestLogDetails.requestlogid}
-            </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Request URL
-            </label>
-            <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
-              {requestLogDetails.requesturl}
-            </p>
-          </div>
-  
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Response Status Code
-            </label>
-            <p className="text-gray-900 dark:text-white/90 font-semibold">
-              {requestLogDetails.responsestatuscode || "N/A"}
-            </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Response Message
-            </label>
-            <p className="text-gray-900 dark:text-white/90 font-semibold">
-              {requestLogDetails.responsemessage || "N/A"}
-            </p>
-          </div>
-        
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Created At
-            </label>
-            <p className="text-gray-900 dark:text-white/90 font-semibold">
-              {new Date(requestLogDetails.createdat).toLocaleString()}
-            </p>
-          </div>
-    
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Request Params
-            </label>
-            <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
-              {requestLogDetails.requestparams || "N/A"}
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Request Data
-            </label>
-            <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
-              {requestLogDetails.requestdata}
-            </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Response Data
-            </label>
-            <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
-              {requestLogDetails.responsedata || "N/A"}
-            </p>
-          </div>
-
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedRequestLogId(null);
+          setCurrentDetails(null);
+        }}
+        className="max-w-2xl"
+      >
+        <div className="p-8 bg-white dark:bg-gray-800 rounded-lg">
+          <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white/90">
+            Request Log Details
+          </h2>
+          
+          {isDetailsLoading && !currentDetails ? (
+            <div className="flex items-center justify-center py-8">
+              <FiLoader className="animate-spin text-blue-500 text-2xl mr-2" />
+              <span>Loading details...</span>
+            </div>
+          ) : currentDetails ? (
+            <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4">
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Request Log ID
+                  </label>
+                  <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
+                    {currentDetails.requestlogid}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Request URL
+                  </label>
+                  <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
+                    {currentDetails.requesturl}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Response Status Code
+                  </label>
+                  <p className="text-gray-900 dark:text-white/90 font-semibold">
+                    {currentDetails.responsestatuscode || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Response Message
+                  </label>
+                  <p className="text-gray-900 dark:text-white/90 font-semibold">
+                    {currentDetails.responsemessage || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Created At
+                  </label>
+                  <p className="text-gray-900 dark:text-white/90 font-semibold">
+                    {new Date(currentDetails.createdat).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Request Params
+                  </label>
+                  <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
+                    {currentDetails.requestparams || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Request Data
+                  </label>
+                  <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
+                    {currentDetails.requestdata || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Response Data
+                  </label>
+                  <p className="text-gray-900 dark:text-white/90 break-words font-semibold">
+                    {currentDetails.responsedata || "N/A"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-600 dark:text-gray-400">No details found.</p>
+          )}
         </div>
-      </div>
-    ) : (
-      <p className="text-gray-600 dark:text-gray-400">No details found.</p>
-    )}
-  </div>
-</Modal>
+      </Modal>
     </>
   );
 }
