@@ -3,11 +3,12 @@ import { useCreateLaptopRequestMutation } from '../../../services/requestLaptop'
 import { FiLoader, FiCheck, FiX } from 'react-icons/fi';
 import Button from '../../ui/button';
 
+
 interface RequestLaptopFormProps {
   currentUser: {
     empNumber: string;
     empName: string;
-    email: string;
+    email: string
   };
   onSuccess?: () => void;
   onCancel?: () => void;
@@ -109,7 +110,7 @@ export default function RequestLaptopForm({ currentUser, onSuccess, onCancel }: 
       <div className="mb-4">
         {isSuccess && (
           <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
-            <FiCheck className="h-4 w-4" />
+            <FiCheck  className="h-4 w-4" />
             <span>Request submitted successfully!</span>
           </div>
         )}
