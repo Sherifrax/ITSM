@@ -1,20 +1,20 @@
 # Trojan Dashboard
 
-Trojan Dashboard is a modern, data-driven admin dashboard built with **React** and **Tailwind CSS**. It provides a comprehensive interface for managing and monitoring various aspects of the Trojan system, including URL mappings, blocked IPs, request logs, and user management.
+Trojan Dashboard is a modern, data-driven admin dashboard built with **React** and **Tailwind CSS**. It provides a comprehensive interface for managing and monitoring laptop requests within the Trojan system, along with user authentication and state management.
 
 ## Overview
 
-This project offers a clean and responsive admin panel designed to help administrators efficiently manage and analyze data related to Trojan operations. The dashboard includes multiple modules and components to facilitate monitoring, control, and reporting.
+This project offers a clean and responsive admin panel designed to help administrators efficiently manage and analyze laptop request data. The dashboard includes modules and components to facilitate request submission, approval workflows, and user management.
 
 ### Key Features
 
-- URL Mapping management
-- Blocked IP list and controls
-- Request logging and analysis
-- User management and authentication
+- Laptop Request management with submission and tracking
+- User authentication and authorization
 - Responsive and accessible UI built with React and Tailwind CSS
 - Dark mode support
-- Modular and extensible architecture
+- Modular and extensible architecture with reusable UI components
+- State management using a centralized store
+- API service integrations for backend communication
 
 ## Installation
 
@@ -41,15 +41,13 @@ npm run dev
 yarn dev
 ```
 
-4. Open your browser and navigate to `http://localhost:3000` (or the port specified in your environment) to access the dashboard.
+3. Open your browser and navigate to `http://localhost:3000` (or the port specified in your environment) to access the dashboard.
 
 ## Project Structure
 
-- `src/pages/UrlMapping/` - Manage URL mappings
-- `src/pages/BlockedIpList/` - View and manage blocked IP addresses
-- `src/pages/RequestLog/` - Analyze request logs
-- `src/pages/UserManagement/` - Manage user accounts and permissions
+- `src/pages/LaptopRequest/` - Manage laptop request submissions and tracking
+- `src/pages/LoginPage/` - User authentication and login
 - `src/components/` - Reusable UI components
 - `src/services/` - API service integrations
 - `src/store/` - State management
-
+- `src/layout/` - Application layout components (sidebar, header, etc.)

@@ -3,15 +3,12 @@ import React, { ReactNode } from "react";
 import NotFound from "./pages/OtherPage/NotFound";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
-import Home from "./pages/Dashboard/Home";
 import Login from "./pages/LoginPage/Login";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
-import { ApiRoutes } from "./router/ApiRoutes";
-import { UrlRoutes } from "./router/UrlRoutes";
-import { RequestLog } from "./router/RequestLog";
-import { BlockedIp } from "./router/BlockedIpList";
-import { useGetDashboardApiCountQuery } from "./services/Dashboard/dashboard.service";
+import { useGetDashboardDataQuery } from "./services/grafanaApi";
+import { ItRoutes } from "./router/routes";
+import Home from "./pages/LaptopRequest/Dashboard";
 
 // Enhanced authentication check with token validation
 const isAuthenticated = () => {
@@ -29,7 +26,7 @@ const isAuthenticated = () => {
 
 // Component to verify authentication before rendering children
 const AuthVerifier = ({ children }: { children: ReactNode }) => {
-  const { error } = useGetDashboardApiCountQuery(); // Using any API query to check auth
+  const { error } = useGetDashboardDataQuery({}); // Using any API query to check auth
   
   if (error && 'status' in error && error.status === 401) {
     localStorage.removeItem("token");
@@ -56,11 +53,8 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
-            <Route index path="/home" element={<Home />} />
-            {ApiRoutes()}
-            {UrlRoutes()}
-            {RequestLog()}
-            {BlockedIp()}
+            <Route index path="/home" element={<Home/>} />
+              {ItRoutes()}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

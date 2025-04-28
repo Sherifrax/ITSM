@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-import { FaArrowRightArrowLeft } from "react-icons/fa6";
-import { GrSecure } from "react-icons/gr";
-import { ImBlocked } from "react-icons/im";
-import { LuMailPlus } from "react-icons/lu";
+import { IoCreate } from "react-icons/io5";
 
 // Assume these icons are imported from an icon library
 import {
   ChevronDownIcon,
-  GridIcon,
   HorizontaLDots,
-  TableIcon,
+  GridIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -28,30 +24,10 @@ const navItems: NavItem[] = [
     path: "/home",
   },
   {
-    name: "API Management",
-    icon: <TableIcon />,
-    path: "/manage-api",
-  },
-  {
-    name: "Middleware Mapping",
-    icon: <FaArrowRightArrowLeft />,
-    path: "/url-mapping"
-  },
-  {
-    // icon: <RiGitPullRequestFill />  ,
-    icon: <LuMailPlus />,
-    name: "Request Log",
-    path: "/requestlog",
-  },
-  {
-    name: "API Security",
-    icon: <GrSecure />,
-    path: "/api-security"
-  },
-  {
-    name: "Blocked IP List",
-    icon: <ImBlocked />,
-    path: "/blocked-ip-list"
+    icon: <IoCreate /> ,
+    name: "IT Request",
+    subItems: [{ name: "Laptop Request", path: "/laptop-request", pro: false } 
+    ],
   },
 ];
 
