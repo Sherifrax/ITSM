@@ -130,7 +130,7 @@ const AppHeader: React.FC = () => {
           </button>
 
            <div className="hidden lg:block">
-           <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">ITMS</h1>
+           <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">ITSM</h1>
             {/* <form>
               <div className="relative">
                 <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">

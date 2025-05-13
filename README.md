@@ -41,7 +41,7 @@ npm run dev
 yarn dev
 ```
 
-3. Open your browser and navigate to `http://localhost:3000` (or the port specified in your environment) to access the dashboard.
+3. Open your browser and navigate to `http://localhost:3001` (or the port specified in your environment) to access the dashboard.
 
 ## Project Structure
 

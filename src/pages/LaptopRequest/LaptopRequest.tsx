@@ -7,7 +7,7 @@ import ComponentCard from "../../components/common/ComponentCard";
 export default function RequestLaptop() {
   const currentUser = {
     empNumber: 'TR100958',
-    empName: 'Nabeel Hashim',
+    empName: 'Abdalrahman Sherif Ibrahim Rashad Elsaid',
     email: "nabeel.h@trojan.ae"
   };
 
@@ -15,8 +15,12 @@ export default function RequestLaptop() {
     <>
       <PageMeta title="Request Laptop" description="" />
       <PageBreadcrumb pageTitle="Laptop Request" />
-      <div className="space-y-4">
-        <ComponentCard title="Request Details">
+      {/* <div className="space-y-6 p-6 bg-white rounded-2xl shadow-lg dark:bg-gray-900"> */}
+      <div className="space-y-6">
+        <ComponentCard 
+          title="Request Details" 
+          className="shadow-xl rounded-3xl border border-gray-200 dark:border-gray-700"
+        >
           <RequestLaptopForm 
             currentUser={currentUser}
             // onSuccess={() => alert('Request submitted successfully! Refresh to see it in your list.')}

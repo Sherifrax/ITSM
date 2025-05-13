@@ -1,150 +1,182 @@
 import React, { useState } from 'react';
 import { useCreateLaptopRequestMutation } from '../../../services/requestLaptop';
-import { FiLoader, FiCheck, FiX } from 'react-icons/fi';
+import { FiLoader, FiCheck, FiX, FiChevronDown, FiInfo } from 'react-icons/fi';
 import Button from '../../ui/button';
-
 
 interface RequestLaptopFormProps {
   currentUser: {
     empNumber: string;
     empName: string;
-    email: string
+    email: string;
   };
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
+const LAPTOP_MODELS = [
+  'XPS-15-Ultrabook',
+  'Latitude-E5550',
+  'Probook-450-G4',
+  'Zbook17-G3',
+  'Latitude-E5580',
+  'Probook-450-G5',
+  'Precision-5530',
+  'Precision-7530-CTO'
+];
+
+const MODEL_DESCRIPTIONS: Record<string, string> = {
+  'XPS-15-Ultrabook': 'High-performance ultrabook with 4K display',
+  'Latitude-E5550': 'Business-class laptop with enterprise features',
+  'Probook-450-G4': 'Reliable workhorse with excellent keyboard',
+  'Zbook17-G3': 'Mobile workstation for creative professionals',
+  'Latitude-E5580': 'Durable business laptop with security features',
+  'Probook-450-G5': 'Updated version with improved performance',
+  'Precision-5530': 'Powerful mobile workstation with NVIDIA graphics',
+  'Precision-7530-CTO': 'Customizable high-end workstation'
+};
+
 export default function RequestLaptopForm({ currentUser, onSuccess, onCancel }: RequestLaptopFormProps) {
-  const [laptopModel, setLaptopModel] = useState('');
+  const [selectedModel, setSelectedModel] = useState('');
   const [description, setDescription] = useState('');
-  const [createLaptopRequest, { isLoading, isSuccess, isError }] = useCreateLaptopRequestMutation();
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createLaptopRequest, { isLoading, isSuccess, isError, reset }] = useCreateLaptopRequestMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Complete payload matching EXACT Swagger specification
       const payload = {
-        createdBy:   {
-          empNumber: "TR100958",
-          empName: "Abdalrahman Sherif",
-          email: "nabeel.h@trojan.ae"
-        },
-        createdFor: {
-          empNumber: "TR100958",
-          empName: "Abdalrahman Sherif",
-          email: "nabeel.h@trojan.ae"
-        },
-        subject: `Laptop Request: ${laptopModel}`,
+        createdBy: currentUser,
+        createdFor: currentUser,
+        subject: description,
         requestType: "1",
-        // These fields are in the successful response
         summitMetaData: {
-          ticketNo: 0, // Required field, set to 0 for new requests
-          message: "", // Empty for new requests
+          ticketNo: 0,
+          message: "",
           summitAiCustomFields: [
             {
-              GroupName: "Request Details", // Must match exactly
+              GroupName: "Request Details",
               AttributeName: "Model",
-              AttributeValue: "EliteBook 840"
-            },
-            // {
-            //   GroupName: "Request Details",
-            //   AttributeName: "Description",
-            //   AttributeValue: description
-            // }
+              AttributeValue: selectedModel
+            }
           ]
-        },
-        // These fields are in the successful response
-        // responseStatus: {
-        //   status: "SUCCESS",
-        //   message: "Request submitted"
-        // }
+        }
       };
 
-      console.log("Final payload being sent:", JSON.stringify(payload, null, 2));
-      
-      const result = await createLaptopRequest(payload).unwrap();
-      console.log("Request successful:", result);
-      
-      setLaptopModel('');
+      await createLaptopRequest(payload).unwrap();
+      setSelectedModel('');
       setDescription('');
-      onSuccess?.();
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        onSuccess?.();
+      }, 2000);
       
     } catch (error: any) {
-      console.error('Full error:', error);
-      if (error.data) {
-        console.error('Server response:', error.data);
-        alert(`Error: ${error.status} - ${JSON.stringify(error.data)}`);
-      } else {
-        alert('Request failed. Please check console for details.');
-      }
+      console.error('Request failed:', error);
+      setTimeout(reset, 3000); // Reset error state after 3 seconds
     }
   };
 
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6">
+    <form onSubmit={handleSubmit} className="space-y-6 p-6 rounded-xl">
       <div>
-        <label className="block text-sm font-medium mb-2 dark:text-gray-400">Laptop Model</label>
-        <input
-          type="text"
-          value={laptopModel}
-          onChange={(e) => setLaptopModel(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
-          placeholder="e.g., Dell XPS 15"
-          required
-        />
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">New Laptop Request</h2>
+        
+        <div className="mb-1 flex items-center justify-between">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Laptop Model <span className="text-red-500">*</span>
+          </label>
+          {selectedModel && MODEL_DESCRIPTIONS[selectedModel] && (
+            <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center">
+              <FiInfo className="mr-1" />
+              {MODEL_DESCRIPTIONS[selectedModel]}
+            </span>
+          )}
+        </div>
+        
+        <div className="relative">
+          <select
+            value={selectedModel}
+            onChange={(e) => {
+              setSelectedModel(e.target.value);
+              reset(); // Clear any previous error/success states
+            }}
+            className="w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base bg-white dark:bg-gray-700 dark:text-white appearance-none"
+            required
+          >
+            <option value="">Select a laptop model</option>
+            {LAPTOP_MODELS.map(model => (
+              <option key={model} value={model} className="dark:bg-gray-700">
+                {model}
+              </option>
+            ))}
+          </select>
+          <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+        </div>
       </div>
+
       <div>
-        <label className="block text-sm font-medium mb-2 dark:text-gray-400">Description</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Description <span className="text-red-500">*</span>
+        </label>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+          Please describe your requirements, including any special configurations needed.
+        </p>
         <textarea
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+          onChange={(e) => {
+            setDescription(e.target.value);
+            reset(); // Clear any previous error/success states
+          }}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base bg-white dark:bg-gray-700 dark:text-white"
           rows={4}
-          placeholder="Describe your requirements..."
+          placeholder="Example: Need this for graphic design work, require high color accuracy display..."
           required
         />
       </div>
 
-      {/* Status message */}
-      <div className="mb-4">
-        {isSuccess && (
-          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
-            <FiCheck  className="h-4 w-4" />
-            <span>Request submitted successfully!</span>
+      <div className="mb-4 transition-all duration-300">
+        {showSuccess && (
+          <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg text-sm animate-fade-in">
+            <FiCheck className="h-4 w-4 flex-shrink-0" />
+            <span>Request submitted successfully! Redirecting...</span>
           </div>
         )}
         {isError && (
-          <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
-            <FiX className="h-4 w-4" />
+          <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm animate-fade-in">
+            <FiX className="h-4 w-4 flex-shrink-0" />
             <span>Error submitting request. Please try again.</span>
           </div>
         )}
       </div>
 
-      <div className="flex justify-end space-x-4">
+      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         {onCancel && (
           <Button
             // type="button"
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 text-lg"
             onClick={onCancel}
             disabled={isLoading}
+            className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 rounded-lg transition-colors"
           >
             Cancel
           </Button>
         )}
         <Button
           // type="submit"
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 text-lg min-w-24"
-          disabled={isLoading || !laptopModel || !description}
+          disabled={isLoading || !selectedModel || !description}
+          className={`px-5 py-2.5 text-sm font-medium text-white rounded-lg transition-all ${
+            isLoading || !selectedModel || !description
+              ? 'bg-blue-400 dark:bg-blue-500 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 shadow-md hover:shadow-lg'
+          }`}
         >
           {isLoading ? (
-            <>
-              <FiLoader className="animate-spin mr-2 inline" />
-              Submitting...
-            </>
+            <span className="flex items-center justify-center">
+              <FiLoader className="animate-spin mr-2" />
+              Processing...
+            </span>
           ) : (
-            "Submit Request"
+            'Submit Request'
           )}
         </Button>
       </div>

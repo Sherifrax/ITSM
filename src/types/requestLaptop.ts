@@ -23,12 +23,22 @@ export interface RequestStatus {
   statusId: number;
   remarks: string;
 }
-
 export interface RequestLaptop {
-  createdBy: Employee;
-  requestId: string;
+  requestId: string; // Add this property if it exists in the data
+  summitMetaData?: {
+    ticketNo?: number;
+    summitAiCustomFields?: Array<{
+      AttributeName: string;
+      AttributeValue: string;
+    }>;
+  };
   subject: string;
-  requestStatus: RequestStatus;
+  requestStatus: {
+    status: string;
+  };
+  createdBy: {
+    empName: string;
+  };
   createdDate: string;
 }
 
@@ -63,6 +73,7 @@ export interface CreateRequestPayload {
   subject: string;
   requestType: string;
   summitMetaData: SummitMetaData;
+  ticketNo: string;
 }
 export enum RequestLaptopStatus {
   PENDING = 'Pending',

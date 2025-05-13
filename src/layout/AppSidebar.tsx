@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-import { IoCreate } from "react-icons/io5";
 import { LuTicketPlus } from "react-icons/lu";
 
 // Assume these icons are imported from an icon library
