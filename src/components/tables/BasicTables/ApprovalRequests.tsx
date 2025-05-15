@@ -550,7 +550,7 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(request.createdDate || request.requestDetails?.createdDate).toLocaleDateString()}
+                      {new Date(request.createdDate || request.requestDetails?.createdDate).toLocaleString()}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap flex gap-2">

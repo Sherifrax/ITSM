@@ -489,7 +489,7 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(request.createdDate).toLocaleDateString()}
+                      {new Date(request.createdDate).toLocaleString()}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
