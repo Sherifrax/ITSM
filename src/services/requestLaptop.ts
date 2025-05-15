@@ -1,5 +1,6 @@
 // src/services/requestLaptop.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { RequestLaptopUrls, RequestLaptop, CreateRequestPayload } from '../types/requestLaptop';
 
 export const requestLaptopApi = createApi({
   reducerPath: 'requestLaptopApi',
@@ -10,26 +11,40 @@ export const requestLaptopApi = createApi({
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
-      headers.set('Content-Type', 'application/json');
+      // Remove Content-Type header for FormData - it will be set automatically
       return headers;
     }
   }),
   endpoints: (builder) => ({
-    // Submit new laptop request
-    createLaptopRequest: builder.mutation({
-      query: (payload) => ({
-        url: 'mr/api/process/start',
+    createLaptopRequest: builder.mutation<RequestLaptop, FormData>({
+      query: (formData) => ({
+        url: RequestLaptopUrls.START,
         method: 'POST',
-        body: payload
+        body: formData,
       }),
     }),
-    // Get requests by creator
-    getRequestsByCreator: builder.query({
-      query: (empNumber) => `mr/api/process/created-by/${empNumber}`,
+    getRequestsByCreator: builder.query<RequestLaptop[], string>({
+      query: (empNumber) => `${RequestLaptopUrls.GET_BY_CREATED_BY}/${empNumber}`,
     }),
-    // Get requests by recipient
-    getRequestsByRecipient: builder.query({
-      query: (empNumber) => `mr/api/process/created-for/${empNumber}`,
+    getRequestsByRecipient: builder.query<RequestLaptop[], string>({
+      query: (empNumber) => `${RequestLaptopUrls.GET_BY_CREATED_FOR}/${empNumber}`,
+    }),
+    getAssignedRequests: builder.query<RequestLaptop[], string>({
+      query: (empNumber) => `${RequestLaptopUrls.GET_ASSIGNED_TO}/${empNumber}`,
+    }),
+    completeTask: builder.mutation({
+      query: ({ taskId, ...body }) => ({
+        url: `mr/api/process/${taskId}/complete`,
+        method: 'POST',
+        body,
+      }),
+    }),
+    updateRequestStatus: builder.mutation({
+      query: ({ ticketNo, ...body }) => ({
+        url: `mr/api/process/update-status/${ticketNo}`,
+        method: 'POST',
+        body,
+      }),
     }),
   }),
 });
@@ -37,5 +52,8 @@ export const requestLaptopApi = createApi({
 export const { 
   useCreateLaptopRequestMutation,
   useGetRequestsByCreatorQuery,
-  useGetRequestsByRecipientQuery 
+  useGetRequestsByRecipientQuery,
+  useGetAssignedRequestsQuery,
+  useCompleteTaskMutation,
+  useUpdateRequestStatusMutation
 } = requestLaptopApi;

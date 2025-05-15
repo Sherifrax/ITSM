@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { LuTicketPlus } from "react-icons/lu";
+import { FcApproval } from "react-icons/fc";
 
 // Assume these icons are imported from an icon library
 import {
@@ -27,6 +28,12 @@ const navItems: NavItem[] = [
     icon: <LuTicketPlus /> ,
     name: "IT Request",
     subItems: [{ name: "Laptop Request", path: "/laptop-request", pro: false } 
+    ],
+  },
+  {
+    icon: <FcApproval /> ,
+    name: "Approvals",
+    subItems: [{ name: "Approval Requests", path: "/approval-request", pro: false } 
     ],
   },
 ];

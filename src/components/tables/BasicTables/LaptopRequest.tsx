@@ -1,17 +1,14 @@
+// src/components/RequestLaptopForm.tsx
 import React, { useState } from 'react';
 import { useCreateLaptopRequestMutation } from '../../../services/requestLaptop';
+import { 
+  RequestType, 
+  SummitAiCustomFieldGroup, 
+  SummitAiCustomFieldName,
+  Employee
+} from '../../../types/requestLaptop';
 import { FiLoader, FiCheck, FiX, FiChevronDown, FiInfo } from 'react-icons/fi';
 import Button from '../../ui/button';
-
-interface RequestLaptopFormProps {
-  currentUser: {
-    empNumber: string;
-    empName: string;
-    email: string;
-  };
-  onSuccess?: () => void;
-  onCancel?: () => void;
-}
 
 const LAPTOP_MODELS = [
   'XPS-15-Ultrabook',
@@ -35,23 +32,40 @@ const MODEL_DESCRIPTIONS: Record<string, string> = {
   'Precision-7530-CTO': 'Customizable high-end workstation'
 };
 
+interface RequestLaptopFormProps {
+  currentUser: Employee;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
 export default function RequestLaptopForm({ currentUser, onSuccess, onCancel }: RequestLaptopFormProps) {
   const [selectedModel, setSelectedModel] = useState('');
   const [description, setDescription] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [createLaptopRequest, { isLoading, isSuccess, isError, reset }] = useCreateLaptopRequestMutation();
 
+  // src/components/RequestLaptopForm.tsx
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = {
-        createdBy: currentUser,
-        createdFor: currentUser,
-        subject: description,
-        requestType: "1",
+      const formData = new FormData();
+      
+      // Create the request data object
+      const requestData = {
+        createdBy: {
+          empNumber: currentUser.empNumber,
+          empName: currentUser.empName,
+          email: currentUser.email
+        },
+        createdFor: {
+          empNumber: currentUser.empNumber,
+          empName: currentUser.empName,
+          email: currentUser.email
+        },
+        // subject: `Laptop Request - ${selectedModel}`,
+        subject: `${description}`,
+        requestTypeId: "1",
         summitMetaData: {
-          ticketNo: 0,
-          message: "",
           summitAiCustomFields: [
             {
               GroupName: "Request Details",
@@ -61,8 +75,16 @@ export default function RequestLaptopForm({ currentUser, onSuccess, onCancel }: 
           ]
         }
       };
-
-      await createLaptopRequest(payload).unwrap();
+  
+      // Append the data to formData
+      formData.append('mrRequestData', JSON.stringify(requestData));
+      
+      // If you have a file to upload, append it like this:
+      // formData.append('file', fileObject);
+  
+      console.log('Submitting payload:', requestData);
+  
+      await createLaptopRequest(formData).unwrap();
       setSelectedModel('');
       setDescription('');
       setShowSuccess(true);
@@ -71,12 +93,12 @@ export default function RequestLaptopForm({ currentUser, onSuccess, onCancel }: 
         onSuccess?.();
       }, 2000);
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Request failed:', error);
-      setTimeout(reset, 3000); // Reset error state after 3 seconds
+      setTimeout(reset, 3000);
     }
   };
-
+  
   return (
     <form onSubmit={handleSubmit} className="space-y-6 p-6 rounded-xl">
       <div>

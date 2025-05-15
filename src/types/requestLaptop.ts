@@ -1,15 +1,36 @@
 // src/types/requestLaptop.ts
 export enum RequestLaptopUrls {
-  Start = "mr/api/process/start",
-  UpdateStatus = "mr/api/process/update-status",
-  GetByCreatedFor = "mr/api/process/created-for",
-  GetByCreatedBy = "mr/api/process/created-by"
+  START = "mr/api/process/start",
+  UPDATE_STATUS = "mr/api/process/update-status",
+  GET_BY_CREATED_FOR = "mr/api/process/created-for",
+  GET_BY_CREATED_BY = "mr/api/process/created-by",
+  GET_ASSIGNED_TO = "mr/api/process/assigned-to"
 }
 
-// In your services/requestLaptop.ts
-export enum ApiBaseName {
-  BASE_URL = "http://10.20.20.54:8080/", 
-  GRAFANA_BASE_URL = "http://localhost:3000/"
+export enum RequestType {
+  LAPTOP_REQUEST = "1"
+}
+
+export enum RequestStatus {
+  PENDING = "PENDING",
+  IN_PROGRESS = "IN PROGRESS",
+  COMPLETED = "COMPLETED",
+  REJECTED = "REJECTED"
+}
+
+export enum RequestStatusId {
+  PENDING = 1,
+  IN_PROGRESS = 5, 
+  COMPLETED = 3,
+  REJECTED = 4
+}
+
+export enum SummitAiCustomFieldGroup {
+  REQUEST_DETAILS = "Request Details"
+}
+
+export enum SummitAiCustomFieldName {
+  MODEL = "Model"
 }
 
 export interface Employee {
@@ -18,20 +39,56 @@ export interface Employee {
   email: string;
 }
 
-export interface RequestStatus {
-  status: string;
-  statusId: number;
-  remarks: string;
+export interface SummitAiCustomField {
+  GroupName: SummitAiCustomFieldGroup;
+  AttributeName: SummitAiCustomFieldName | string;
+  AttributeValue: string;
 }
-export interface RequestLaptop {
-  requestId: string; // Add this property if it exists in the data
-  summitMetaData?: {
-    ticketNo?: number;
-    summitAiCustomFields?: Array<{
-      AttributeName: string;
-      AttributeValue: string;
-    }>;
+
+export interface SummitMetaData {
+  ticketNo?: number;
+  message?: string;
+  status?: string;
+  summitAiCustomFields: SummitAiCustomField[];
+}
+
+export interface RequestStatusDetail {
+  status: RequestStatus | string;
+  statusId: RequestStatusId | number;
+  remarks?: string;
+}
+
+export interface Approver {
+  empNumber: string;
+  empName?: string;
+  email?: string;
+  taskId: string;
+  lastUpdated: string;
+  currentStatus: string;
+  currentStatusId: number;
+  remarks?: string;
+}
+
+// src/types/requestLaptop.ts
+export interface CreateRequestPayload {
+  file?: string; // Optional file field
+  mrRequestData: {
+    createdBy: Employee;
+    createdFor: Employee;
+    subject: string;
+    requestTypeId: string;
+    summitMetaData: SummitMetaData;
+    // These fields are optional and will be filled by the server
+    requestId?: string;
+    camundaProcessInstanceId?: string;
+    createdDate?: string;
+    approverList?: Approver[];
+    requestStatus?: RequestStatusDetail;
   };
+}
+
+export interface RequestLaptop {
+  requestId: string;
   subject: string;
   requestStatus: {
     status: string;
@@ -40,51 +97,11 @@ export interface RequestLaptop {
     empName: string;
   };
   createdDate: string;
-}
-
-export interface CreateRequestPayload {
-  createdBy: Employee;
-  createdFor: Employee; // Add this
-  subject: string;
-  requestType: string; // Add this
-  summitMetaData: { // Add this
-    summitAiCustomFields: {
-      GroupName: string;
+  summitMetaData?: {
+    ticketNo?: number;
+    summitAiCustomFields?: {
       AttributeName: string;
       AttributeValue: string;
     }[];
   };
-}
-
-// In your types/requestLaptop.ts
-export interface SummitAiCustomField {
-  GroupName: string;
-  AttributeName: string;
-  AttributeValue: string;
-}
-
-export interface SummitMetaData {
-  summitAiCustomFields: SummitAiCustomField[];
-}
-
-export interface CreateRequestPayload {
-  createdBy: Employee;
-  createdFor: Employee;
-  subject: string;
-  requestType: string;
-  summitMetaData: SummitMetaData;
-  ticketNo: string;
-}
-export enum RequestLaptopStatus {
-  PENDING = 'Pending',
-  IN_PROGRESS = 'In Progress',
-  COMPLETED = 'Completed',
-  REJECTED = 'Rejected'
-}
-
-export enum RequestLaptopStatusId {
-  PENDING = 1,
-  IN_PROGRESS = 2,
-  COMPLETED = 3,
-  REJECTED = 4
 }

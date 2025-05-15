@@ -7,8 +7,8 @@ import Login from "./pages/LoginPage/Login";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { useGetDashboardDataQuery } from "./services/grafanaApi";
-import { ItRoutes } from "./router/routes";
-import Home from "./pages/LaptopRequest/Dashboard";
+import { ApprovalReq, ItRoutes } from "./router/routes";
+import Home from "./pages/Dashboard";
 
 // Enhanced authentication check with token validation
 const isAuthenticated = () => {
@@ -55,6 +55,7 @@ const App: React.FC = () => {
           <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
             <Route index path="/home" element={<Home/>} />
               {ItRoutes()}
+              {ApprovalReq()}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

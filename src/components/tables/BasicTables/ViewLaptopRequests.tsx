@@ -7,6 +7,7 @@ import { Modal } from '../../ui/modal';
 import { FcViewDetails } from "react-icons/fc";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { FcApproval } from "react-icons/fc";
 
 interface RequestLaptopTableProps {
   requests: RequestLaptop[];
@@ -74,7 +75,7 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
       const requestDate = new Date(request.createdDate);
       const matchesDate =
         (!dateFilter.start || requestDate >= new Date(dateFilter.start)) &&
-        (!dateFilter.end || requestDate <= new Date(dateFilter.end));
+        (!dateFilter.end || requestDate <= new Date(new Date(dateFilter.end).setHours(23, 59, 59, 999)));
 
       return matchesSearch && matchesStatus && matchesLaptopModel && matchesDate;
     });
@@ -155,7 +156,7 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
       {/* Search and Filter Section */}
       <div className="flex gap-4 items-center w-full">
         <div className="relative flex-1">
-          <div className="flex rounded-full shadow-md hover:shadow-lg transition-shadow w-full bg-gray-100 dark:bg-gray-800">
+          <div className="flex rounded-full shadow-md transition-shadow w-full bg-gray-100 dark:bg-gray-800">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
               <FiSearch className="w-5 h-5" />
             </span>
@@ -188,164 +189,169 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
             />
           </svg>
-          <span className="hidden sm:inline">Filters</span>
+          {/* <span className="sm-inline text-gray-700">Filters</span> */}
         </Button>
       </div>
 
       {/* Filter Panel */}
       {isFilterOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+  <>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+      onClick={() => setIsFilterOpen(false)}
+    />
+    <div
+      className="fixed top-15 right-0 h-[calc(100%-5rem)] w-96 bg-white dark:bg-gray-900 shadow-2xl transition-transform duration-300 ease-in-out z-50 rounded-l-3xl flex flex-col"
+      style={{ minHeight: "calc(100vh - 5rem)" }}
+    >
+      {/* Filter Header */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Advanced Filters
+          </h3>
+          <button
             onClick={() => setIsFilterOpen(false)}
-          />
-          <div
-            className="fixed top-20 right-0 h-[calc(100%-5rem)] w-96 bg-white dark:bg-gray-900 shadow-2xl transition-transform duration-300 ease-in-out z-50 rounded-l-3xl p-8 flex flex-col"
-            style={{ minHeight: "calc(100vh - 5rem)" }}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+            aria-label="Close filter panel"
           >
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                Advanced Filters
-              </h3>
-              <button
-                onClick={() => setIsFilterOpen(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
-                aria-label="Close filter panel"
-              >
-                <FiX className="w-7 h-7" />
-              </button>
+            <FiX className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Body - Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-gray-500 uppercase dark:text-gray-400 tracking-wider">
+            Status Filters
+          </h4>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full p-4 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          >
+            <option value="all">All Statuses</option>
+            {uniqueStatuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-gray-500 uppercase dark:text-gray-400 tracking-wider">
+            Laptop Models
+          </h4>
+          <select
+            value={laptopModelFilter}
+            onChange={(e) => {
+              setLaptopModelFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full p-4 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          >
+            <option value="all">All Models</option>
+            {uniqueLaptopModels.map((model) => (
+              <option key={model} value={model}>
+                {model}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-gray-500 uppercase dark:text-gray-400 tracking-wider">
+            Date Range
+          </h4>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                From
+              </label>
+              <DatePicker
+                selected={dateFilter.start}
+                onChange={(date: Date | null) => {
+                  if (date && dateFilter.end && date > dateFilter.end) {
+                    setDateError("Start date can't be after end date");
+                  } else {
+                    setDateError(null);
+                    setDateFilter({ ...dateFilter, start: date });
+                  }
+                }}
+                selectsStart
+                startDate={dateFilter.start}
+                endDate={dateFilter.end}
+                maxDate={dateFilter.end || new Date()}
+                placeholderText="Select start date"
+                className="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                wrapperClassName="w-full"
+              />
             </div>
 
-            <div className="space-y-8 flex-1 overflow-y-auto pr-6">
-              <div className="space-y-6">
-                <h4 className="text-base font-semibold text-gray-500 uppercase dark:text-gray-400 tracking-wide">
-                  Status Filters
-                </h4>
-                <div className="space-y-4">
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => {
-                      setStatusFilter(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full p-4 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  >
-                    <option value="all">All Statuses</option>
-                    {uniqueStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <h4 className="text-base font-semibold text-gray-500 uppercase dark:text-gray-400 tracking-wide">
-                  Laptop Models
-                </h4>
-                <div className="space-y-4">
-                  <select
-                    value={laptopModelFilter}
-                    onChange={(e) => {
-                      setLaptopModelFilter(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full p-4 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  >
-                    <option value="all">All Models</option>
-                    {uniqueLaptopModels.map((model) => (
-                      <option key={model} value={model}>
-                        {model}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {/* Start Date Picker */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    From
-                  </label>
-                  <DatePicker
-                    selected={dateFilter.start}
-                    onChange={(date: Date | null) => {
-                      if (date && dateFilter.end && date > dateFilter.end) {
-                        setDateError("Start date can't be after end date");
-                      } else {
-                        setDateError(null);
-                        setDateFilter({ ...dateFilter, start: date });
-                      }
-                    }}
-                    selectsStart
-                    startDate={dateFilter.start}
-                    endDate={dateFilter.end}
-                    maxDate={dateFilter.end || new Date()}
-                    placeholderText="Select start date"
-                    className="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                    wrapperClassName="w-full"
-                  />
-                </div>
-
-                {/* End Date Picker */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    To
-                  </label>
-                  <DatePicker
-                    selected={dateFilter.end}
-                    onChange={(date: Date | null) => {
-                      if (date && dateFilter.start && date < dateFilter.start) {
-                        setDateError("End date can't be before start date");
-                      } else {
-                        setDateError(null);
-                        setDateFilter({ ...dateFilter, end: date });
-                      }
-                    }}
-                    selectsEnd
-                    startDate={dateFilter.start}
-                    endDate={dateFilter.end}
-                    minDate={dateFilter.start || undefined}
-                    maxDate={new Date()}
-                    placeholderText="Select end date"
-                    className="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                    wrapperClassName="w-full"
-                  />
-                </div>
-
-                {/* Error Message */}
-                {dateError && (
-                  <div className="text-red-500 text-sm mt-2">
-                    {dateError}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex space-x-4 border-t border-gray-200 dark:border-gray-700 pt-8">
-                <Button
-                  onClick={() => {
-                    setStatusFilter('all');
-                    setLaptopModelFilter('all');
-                    setDateFilter({ start: null, end: null });
-                    setCurrentPage(1);
-                  }}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white py-4 text-lg rounded-2xl transition"
-                >
-                  Clear All
-                </Button>
-                <Button
-                  onClick={() => setIsFilterOpen(false)}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 text-lg rounded-2xl transition"
-                >
-                  Apply Filters
-                </Button>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                To
+              </label>
+              <DatePicker
+                selected={dateFilter.end}
+                onChange={(date: Date | null) => {
+                  if (date && dateFilter.start && date < dateFilter.start) {
+                    setDateError("End date can't be before start date");
+                  } else {
+                    setDateError(null);
+                    setDateFilter({ ...dateFilter, end: date });
+                  }
+                }}
+                selectsEnd
+                startDate={dateFilter.start}
+                endDate={dateFilter.end}
+                minDate={dateFilter.start || undefined}
+                maxDate={new Date()}
+                placeholderText="Select end date"
+                className="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                wrapperClassName="w-full"
+              />
             </div>
+
+            {dateError && (
+              <div className="text-red-500 text-sm mt-1">
+                {dateError}
+              </div>
+            )}
           </div>
-        </>
-      )}
+        </div>
+      </div>
+
+      {/* Filter Footer - Fixed at Bottom */}
+      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex space-x-4">
+          <Button
+            onClick={() => {
+              setStatusFilter('all');
+              setLaptopModelFilter('all');
+              setDateFilter({ start: null, end: null });
+              setCurrentPage(1);
+            }}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white py-4 text-lg rounded-2xl transition"
+          >
+            Clear All
+          </Button>
+          <Button
+            onClick={() => setIsFilterOpen(false)}
+            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 text-lg rounded-2xl transition"
+          >
+            Apply Filters
+          </Button>
+        </div>
+      </div>
+    </div>
+  </>
+)}
 
       {/* Table */}
       <div className="overflow-hidden rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
@@ -461,7 +467,14 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
                             <FiClock className="mr-2 text-blue-500" />
                             <span className="text-blue-600 dark:text-blue-400">In Progress</span>
                           </>
-                        ) : (
+                        ) 
+                        : request.requestStatus.status.toLowerCase() === 'approved' ? (
+                          <>
+                            <FcApproval className="mr-2 text-green-500" />
+                            <span className="text-green-600 dark:text-green-400">Approved</span>
+                          </>
+                        ) 
+                        : (
                           <>
                             <FiClock className="mr-2 text-gray-500" />
                             <span className="text-gray-500 dark:text-gray-400">{request.requestStatus.status}</span>
@@ -583,6 +596,13 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
                       <>
                         <FiClock className="mr-2 text-blue-500" />
                         <span className="text-blue-600 dark:text-blue-400 font-semibold text-lg">In Progress</span>
+                      </>
+                    )
+                    
+                    : selectedRequest.requestStatus.status.toLowerCase() === 'approved' ? (
+                      <>
+                        <FcApproval className="mr-2 text-green-500" />
+                        <span className="text-green-600 dark:text-green-400 font-semibold text-lg">Approved</span>
                       </>
                     ) : (
                       <>
