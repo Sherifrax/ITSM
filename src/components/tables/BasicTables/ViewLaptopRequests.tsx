@@ -10,7 +10,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FcApproval } from "react-icons/fc";
 import { AiTwotoneNotification } from "react-icons/ai";
-import { MdOpenInFull } from "react-icons/md";
+import { MdOutlinePendingActions } from "react-icons/md";
+import { BsPersonWorkspace } from "react-icons/bs";
+import { AiOutlineFileDone } from "react-icons/ai";
+import { MdDoneOutline } from "react-icons/md";
 
 interface RequestLaptopTableProps {
   requests: RequestLaptop[];
@@ -60,8 +63,8 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
       Icon = FiClock;
       colorClass = 'text-blue-500';
       textClass = 'text-blue-600 dark:text-blue-400';
-    } else if (lowerStatus === 'resolved' || lowerStatus === 'closed') {
-      Icon = FiCheck;
+    } else if (lowerStatus === 'resolved') {
+      Icon = MdDoneOutline ;
       colorClass = 'text-green-500';
       textClass = 'text-green-600 dark:text-green-400';
     } else if (lowerStatus === 'rejected' || lowerStatus === 'cancelled' || lowerStatus === 'canceled') {
@@ -69,9 +72,19 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
       colorClass = 'text-red-500';
       textClass = 'text-red-600 dark:text-red-400';
     } else if (lowerStatus === 'pending') {
-      Icon = FiClock;
+      Icon = MdOutlinePendingActions ;
       colorClass = 'text-yellow-500';
       textClass = 'text-yellow-600 dark:text-yellow-400';
+    }
+    else if (lowerStatus === 'assigned') {
+      Icon = BsPersonWorkspace  ;
+      colorClass = 'text-purple-500';
+      textClass = 'text-purple-600 dark:text-purple-400';
+    }
+    else if (lowerStatus === 'closed') {
+      Icon = AiOutlineFileDone;
+      colorClass = 'text-green-500';
+      textClass = 'text-green-600 dark:text-green-400';
     }
 
     return (
