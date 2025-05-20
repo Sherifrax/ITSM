@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FcViewDetails, FcApproval } from "react-icons/fc";
+import { MdOpenInFull } from "react-icons/md";
 
 interface ApprovalRequestTableProps {
   requests: any[]; // Using any[] temporarily since your API response structure is complex
@@ -21,6 +22,10 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
   const [remarks, setRemarks] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [completeTask] = useCompleteTaskMutation();
+
+  // New state for subject modal
+  const [showSubjectModal, setShowSubjectModal] = useState(false);
+  const [currentSubject, setCurrentSubject] = useState('');
 
   // Pagination and filtering states
   const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -566,7 +571,7 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 dark:bg-gray-800 sticky right-0 z-20"
                 >
                   Actions
                 </th>
@@ -601,9 +606,22 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words">
-                        {request.requestDetails?.subject}
-                      </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words">
+{request.requestDetails?.subject && request.requestDetails.subject.length > 10 ? (
+  <span
+    onClick={() => {
+      setCurrentSubject(request.requestDetails?.subject || '');
+      setShowSubjectModal(true);
+    }}
+    className="cursor-pointer underline text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+    title="Click to view full subject"
+  >
+    {request.requestDetails.subject.substring(0, 10)}...
+  </span>
+) : (
+  request.requestDetails?.subject || 'N/A'
+)}
+                    </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -640,7 +658,7 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
                       {new Date(request.createdDate || request.requestDetails?.createdDate).toLocaleString()}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap flex gap-2">
+                    <td className="px-6 py-4 whitespace-nowrap flex gap-2 bg-white dark:bg-gray-900 sticky right-0 z-10">
                       <Button
                         onClick={() => setSelectedRequest(request)}
                         className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg"
@@ -889,6 +907,30 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
           )}
           <span>{approvalStatus.message}</span>
         </div>
+      )}
+
+      {/* Subject Details Modal */}
+      {showSubjectModal && (
+        <Modal
+          isOpen={showSubjectModal}
+          onClose={() => setShowSubjectModal(false)}
+          className="max-w-2xl rounded-3xl overflow-hidden shadow-2xl"
+        >
+          <div className="p-6 bg-white dark:bg-gray-900 rounded-3xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white/90">Subject Details</h3>
+              <button
+                onClick={() => setShowSubjectModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-white"
+              >
+                <FiX className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-gray-800 dark:text-white/90 whitespace-pre-wrap">{currentSubject}</p>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

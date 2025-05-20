@@ -10,6 +10,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FcApproval } from "react-icons/fc";
 import { AiTwotoneNotification } from "react-icons/ai";
+import { MdOpenInFull } from "react-icons/md";
 
 interface RequestLaptopTableProps {
   requests: RequestLaptop[];
@@ -30,6 +31,10 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState<RequestLaptop | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
+
+  const [showSubjectModal, setShowSubjectModal] = useState(false);
+  const [currentSubject, setCurrentSubject] = useState('');
+
   const itemsPerPage = 8;
 
   // Helper function to render ITSM ticket status with icon and color
@@ -48,7 +53,7 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
     let label = status;
 
     if (lowerStatus === 'open' || lowerStatus === 'new') {
-      Icon = AiTwotoneNotification  ;
+      Icon = AiTwotoneNotification;
       colorClass = 'text-blue-500';
       textClass = 'text-blue-600 dark:text-blue-400';
     } else if (lowerStatus === 'in-progress') {
@@ -527,7 +532,7 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 dark:bg-gray-800 sticky right-0 z-20"
                 >
                   Actions
                 </th>
@@ -567,8 +572,21 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words">
-                        {request.subject}
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+{request.subject && request.subject.length > 10 ? (
+  <span
+    onClick={() => {
+      setCurrentSubject(request.subject);
+      setShowSubjectModal(true);
+    }}
+    className="cursor-pointer underline text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+    title="Click to view full subject"
+  >
+    {request.subject.substring(0, 10)}...
+  </span>
+) : (
+  request.subject || 'N/A'
+)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -608,7 +626,7 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
                         {new Date(request.createdDate).toLocaleString()}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap flex gap-2 bg-white dark:bg-gray-900 sticky right-0 z-10">
                       <Button
                         onClick={() => setSelectedRequest(request)}
                       >
@@ -781,6 +799,29 @@ export default function RequestLaptopTable({ requests, isLoading }: RequestLapto
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {showSubjectModal && (
+        <Modal
+          isOpen={showSubjectModal}
+          onClose={() => setShowSubjectModal(false)}
+          className="max-w-2xl rounded-3xl overflow-hidden shadow-2xl"
+        >
+          <div className="p-6 bg-white dark:bg-gray-900 rounded-3xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white/90">Subject Details</h3>
+              <button
+                onClick={() => setShowSubjectModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-white"
+              >
+                <FiX className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-gray-800 dark:text-white/90 whitespace-pre-wrap">{currentSubject}</p>
             </div>
           </div>
         </Modal>
