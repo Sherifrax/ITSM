@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { FiCheck, FiX, FiClock, FiSearch, FiArrowUp, FiArrowDown, FiX as FiClose } from 'react-icons/fi';
+import { FiCheck, FiX, FiClock, FiSearch, FiArrowUp, FiArrowDown, FiX as FiClose, FiServer, FiPackage, FiDollarSign, FiShoppingCart } from 'react-icons/fi';
 import Button from '../../ui/button';
 import { Modal } from '../../ui/modal';
 import { useCompleteTaskMutation } from '../../../services/requestLaptop';
@@ -28,6 +28,7 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [laptopModelFilter, setLaptopModelFilter] = useState<string>('all');
+  const [taskFilter, setTaskFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<{ start: Date | null, end: Date | null }>({ start: null, end: null });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,6 +42,36 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
     return modelField?.AttributeValue || 'N/A';
   };
 
+  const getTaskDisplayName = (taskName: string): string => {
+    switch (taskName) {
+      case 'It_Eligibility_Check_Task':
+        return 'IT ELIGIBILITY CHECK';
+      case 'Warehouse_Check_Task':
+        return 'WAREHOUSE CHECK';
+      case 'Budget_Check_Task':
+        return 'BUDGET CHECK';
+      case 'Purchase_Complete_Task':
+        return 'PURCHASE COMPLETE';
+      default:
+        return taskName || 'N/A';
+    }
+  };
+
+  const getTaskIcon = (taskName: string) => {
+    switch (taskName) {
+      case 'It_Eligibility_Check_Task':
+        return <FiServer className="text-blue-500" />;
+      case 'Warehouse_Check_Task':
+        return <FiPackage className="text-orange-500" />;
+      case 'Budget_Check_Task':
+        return <FiDollarSign className="text-green-500" />;
+      case 'Purchase_Complete_Task':
+        return <FiShoppingCart className="text-purple-500" />;
+      default:
+        return <FiClock className="text-gray-500" />;
+    }
+  };
+
   const uniqueLaptopModels = useMemo(() => {
     const models = requests
       .map((r) => getLaptopModel(r))
@@ -51,6 +82,11 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
   const uniqueStatuses = useMemo(() => {
     const statuses = requests.map((r) => r.taskStatus || 'Unknown');
     return Array.from(new Set(statuses));
+  }, [requests]);
+
+  const uniqueTasks = useMemo(() => {
+    const tasks = requests.map((r) => r.taskName || 'Unknown');
+    return Array.from(new Set(tasks));
   }, [requests]);
 
   const handleSort = (column: string) => {
@@ -81,15 +117,18 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
       const matchesLaptopModel =
         laptopModelFilter === 'all' || getLaptopModel(request).toLowerCase() === laptopModelFilter.toLowerCase();
 
+      const matchesTask =
+        taskFilter === 'all' || (request.taskName || 'Unknown').toLowerCase() === taskFilter.toLowerCase();
+
       // Date filter logic
       const requestDate = new Date(request.createdDate || request.requestDetails?.createdDate);
       const matchesDate =
         (!dateFilter.start || requestDate >= new Date(dateFilter.start)) &&
         (!dateFilter.end || requestDate <= new Date(new Date(dateFilter.end).setHours(23, 59, 59, 999)));
 
-      return matchesSearch && matchesStatus && matchesLaptopModel && matchesDate;
+      return matchesSearch && matchesStatus && matchesLaptopModel && matchesTask && matchesDate;
     });
-  }, [requests, searchQuery, statusFilter, laptopModelFilter, dateFilter.start, dateFilter.end]);
+  }, [requests, searchQuery, statusFilter, laptopModelFilter, taskFilter, dateFilter.start, dateFilter.end]);
 
   const sortedRequests = useMemo(() => {
     if (!sortColumn) return filteredRequests;
@@ -99,6 +138,14 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
       let bValue: any;
 
       switch (sortColumn) {
+        case 'requestId':
+          aValue = a.userProcessRequestId || a.taskId || '';
+          bValue = b.userProcessRequestId || b.taskId || '';
+          break;
+        case 'task':
+          aValue = getTaskDisplayName(a.taskName).toLowerCase();
+          bValue = getTaskDisplayName(b.taskName).toLowerCase();
+          break;
         case 'ticketNo':
           aValue = a.requestDetails?.summitMetaData?.ticketNo || 0;
           bValue = b.requestDetails?.summitMetaData?.ticketNo || 0;
@@ -311,6 +358,27 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
 
         <div className="space-y-4">
           <h4 className="text-sm font-semibold text-gray-500 uppercase dark:text-gray-400 tracking-wider">
+            Task Filters
+          </h4>
+          <select
+            value={taskFilter}
+            onChange={(e) => {
+              setTaskFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full p-4 border border-gray-300 rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          >
+            <option value="all">All Tasks</option>
+            {uniqueTasks.map((task) => (
+              <option key={task} value={task}>
+                {getTaskDisplayName(task)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-gray-500 uppercase dark:text-gray-400 tracking-wider">
             Laptop Models
           </h4>
           <select
@@ -399,6 +467,7 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
           <Button
             onClick={() => {
               setStatusFilter('all');
+              setTaskFilter('all');
               setLaptopModelFilter('all');
               setDateFilter({ start: null, end: null });
               setCurrentPage(1);
@@ -428,11 +497,21 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
                 <th
                   scope="col"
                   className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  onClick={() => handleSort('ticketNo')}
+                  onClick={() => handleSort('requestId')}
                 >
                   <div className="flex items-center">
-                    Ticket No
-                    {getSortIcon('ticketNo')}
+                    Request ID
+                    {getSortIcon('requestId')}
+                  </div>
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  onClick={() => handleSort('task')}
+                >
+                  <div className="flex items-center">
+                    Task
+                    {getSortIcon('task')}
                   </div>
                 </th>
                 <th
@@ -496,7 +575,7 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               {paginatedRequests.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-6 text-gray-500 dark:text-gray-400">
+                  <td colSpan={8} className="text-center py-6 text-gray-500 dark:text-gray-400">
                     No requests found matching the criteria.
                   </td>
                 </tr>
@@ -505,7 +584,15 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
                   <tr key={request.taskId} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white/90">
-                        {request.requestDetails?.summitMetaData?.ticketNo || 'N/A'}
+                        {request.userProcessRequestId || request.taskId || 'N/A'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {getTaskIcon(request.taskName)}
+                        <span className="ml-2 text-sm font-medium text-gray-900 dark:text-white/90">
+                          {getTaskDisplayName(request.taskName)}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -660,11 +747,22 @@ export default function ApprovalRequestTable({ requests, isLoading, refetch }: A
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
                   <label className="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                    Ticket Number
+                    Request ID
                   </label>
                   <p className="text-gray-900 dark:text-white/90 font-semibold text-lg">
-                    {selectedRequest.requestDetails?.summitMetaData?.ticketNo || 'N/A'}
+                    {selectedRequest.userProcessRequestId || 'N/A'}
                   </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                    Task
+                  </label>
+                  <div className="flex items-center">
+                    {getTaskIcon(selectedRequest.taskName)}
+                    <span className="ml-2 text-gray-900 dark:text-white/90 font-semibold text-lg">
+                      {getTaskDisplayName(selectedRequest.taskName)}
+                    </span>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">

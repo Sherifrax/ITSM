@@ -99,6 +99,8 @@ export interface RequestLaptop {
   createdDate: string;
   summitMetaData?: {
     ticketNo?: number;
+    ticketStatus?: string;
+    status?: string;
     summitAiCustomFields?: {
       AttributeName: string;
       AttributeValue: string;

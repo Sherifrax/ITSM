@@ -1,4 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { requestLaptopApi } from '../../services/requestLaptop';
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import RequestLaptopForm from "../../components/tables/BasicTables/LaptopRequest";
@@ -10,6 +13,8 @@ export default function RequestLaptop() {
     empName: 'Nabeel Hashim',
     email: "nabeel.h@trojan.ae"
   };
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   return (
     <>
@@ -23,7 +28,10 @@ export default function RequestLaptop() {
         >
           <RequestLaptopForm 
             currentUser={currentUser}
-            // onSuccess={() => alert('Request submitted successfully! Refresh to see it in your list.')}
+            onSuccess={() => {
+              dispatch(requestLaptopApi.util.resetApiState());
+              navigate('/home');
+            }}
           />
         </ComponentCard>
       </div>
